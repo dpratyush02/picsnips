@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" width="800" height="240">
+  <defs>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon (160x160) -->
+  <g transform="translate(40, 40)">
+    <rect width="160" height="160" rx="40" fill="#09090b" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+    <g fill="#ffffff">
+      <rect x="30" y="36" width="12" height="88" rx="3" fill="url(#brandGradient)"/>
+      <rect x="50" y="36" width="12" height="88" rx="3" opacity="0.9"/>
+      <rect x="70" y="36" width="12" height="88" rx="3" opacity="0.75"/>
+      <rect x="90" y="36" width="12" height="88" rx="3" opacity="0.6"/>
+      <rect x="110" y="36" width="12" height="88" rx="3" opacity="0.4"/>
+    </g>
+  </g>
+
+  <!-- Typography -->
+  <text x="230" y="132" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="76" font-weight="800" letter-spacing="-0.03em">PicSnips</text>
+  <text x="232" y="168" fill="#a1a1aa" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="500" letter-spacing="0.02em">20-IMAGE SPLITTER FOR X</text>
+</svg>
