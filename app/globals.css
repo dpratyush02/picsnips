@@ -137,7 +137,7 @@
   }
 }
 
-@keyframes picsnap-gap {
+@keyframes picsnips-gap {
   0%,
   18% {
     gap: 0px;
@@ -152,7 +152,7 @@
 }
 
 .hero-strips {
-  animation: picsnap-gap 3.4s ease-in-out infinite;
+  animation: picsnips-gap 3.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,7 +1,7 @@
 /**
  * Publishing boundary.
  *
- * Today, PicSnap can only open X's public composer. X does not accept
+ * Today, PicSnips can only open X's public composer. X does not accept
  * image bytes on that URL, so the composer receives the caption and the
  * person attaches the downloaded files themselves.
  *

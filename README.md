@@ -1,4 +1,4 @@
-# PicSnap
+# PicSnips
 
 Free browser-based splitter for X's 20-image posts. Upload one picture, cut it into ordered slices, and download a ZIP. Images are processed locally and are not uploaded.
 

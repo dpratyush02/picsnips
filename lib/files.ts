@@ -35,5 +35,5 @@ export function pieceFilename(index: number, format: ImageFormat): string {
 
 export function archiveFilename(count: number, rows: number, cols: number): string {
   const mode = rows === 1 ? "vertical" : cols === 1 ? "horizontal" : "grid";
-  return `picsnap-${count}-${mode}.zip`;
+  return `picsnips-${count}-${mode}.zip`;
 }

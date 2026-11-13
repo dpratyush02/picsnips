@@ -61,5 +61,5 @@ export async function createSampleImage(): Promise<File> {
     }, "image/png");
   });
 
-  return new File([blob], "picsnap-sample.png", { type: "image/png" });
+  return new File([blob], "picsnips-sample.png", { type: "image/png" });
 }

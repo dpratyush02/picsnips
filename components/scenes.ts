@@ -99,7 +99,7 @@ export const scenes: Scene[] = [
   {
     id: "dunes",
     title: "Dune line",
-    caption: "The same idea works for any panorama. PicSnap only cuts — it does not redraw the picture.",
+    caption: "The same idea works for any panorama. PicSnips only cuts — it does not redraw the picture.",
     svg: dunes,
   },
 ];

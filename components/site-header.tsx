@@ -18,7 +18,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/75 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="rounded-lg text-foreground focus-visible:ring-3 focus-visible:ring-ring/50" aria-label="PicSnap home">
+        <Link href="/" className="rounded-lg text-foreground focus-visible:ring-3 focus-visible:ring-ring/50" aria-label="PicSnips home">
           <Logo />
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex" aria-label="Primary">

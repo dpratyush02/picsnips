@@ -1,8 +1,8 @@
 export const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://picsnap.app"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://picsnips.app"
 ).replace(/\/$/, "");
 
-export const siteName = "PicSnap";
+export const siteName = "PicSnips";
 
 export const defaultCaption = "One image. Twenty pieces.";
 

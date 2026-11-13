@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
 import { seoDescription, siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
@@ -14,13 +15,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const title = "PicSnap — Free 20 Image Splitter for X (Twitter)";
+const title = "PicSnips — Free 20 Image Splitter for X (Twitter)";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: title,
-    template: "%s — PicSnap",
+    template: "%s — PicSnips",
   },
   description: seoDescription,
   applicationName: siteName,
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     "Twitter image splitter",
     "split image into 20 parts",
     "X panoramic post maker",
-    "PicSnap",
+    "PicSnips",
   ],
   alternates: { canonical: "/" },
   openGraph: {
@@ -81,6 +82,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         {children}
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );

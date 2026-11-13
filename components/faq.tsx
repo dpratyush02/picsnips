@@ -15,13 +15,13 @@ const questions = [
   },
   {
     id: "quality",
-    question: "Does PicSnap reduce image quality?",
+    question: "Does PicSnips reduce image quality?",
     answer:
       "PNG export is lossless after your browser decodes the image. Pieces keep the original pixel size, nothing is upscaled, and remainder pixels are distributed so every column and row is kept. JPEG is optional and starts at quality 95, with transparency flattened onto white. EXIF metadata is not copied, because the browser works from decoded pixels.",
   },
   {
     id: "free",
-    question: "Is PicSnap free?",
+    question: "Is PicSnips free?",
     answer:
       "Yes. There is no account, watermark, or paywall. The only limit is what your browser can hold in memory.",
   },
@@ -29,7 +29,7 @@ const questions = [
     id: "upload",
     question: "Are my images uploaded to a server?",
     answer:
-      "No. Splitting, preview, and the ZIP are all created locally in your browser. The image file is never sent to PicSnap. Opening X only sends the caption you typed to X's composer.",
+      "No. Splitting, preview, and the ZIP are all created locally in your browser. The image file is never sent to PicSnips. Opening X only sends the caption you typed to X's composer.",
   },
   {
     id: "count",

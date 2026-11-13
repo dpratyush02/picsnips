@@ -47,7 +47,7 @@ export function orderNote(details: {
         : `${details.rows} rows × ${details.cols} columns, left to right then top to bottom`;
 
   return [
-    "PicSnap",
+    "PicSnips",
     "",
     "Upload these files to X in numeric order, starting with 01.",
     "The composer will not attach them for you.",

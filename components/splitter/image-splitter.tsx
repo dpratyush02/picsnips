@@ -496,7 +496,7 @@ function SplitterTool() {
         return;
       }
       toast.message("X composer opened", {
-        description: `Attach the images yourself, in order from 01. PicSnap cannot post them for you.`,
+        description: `Attach the images yourself, in order from 01. PicSnips cannot post them for you.`,
       });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not open X.");

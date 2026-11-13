@@ -13,7 +13,7 @@ export function Logo({ className }: { className?: string }) {
           <rect x="21" y="6" width="2" height="16" rx="0.5" opacity="0.35" />
         </g>
       </svg>
-      PicSnap
+      PicSnips
     </span>
   );
 }

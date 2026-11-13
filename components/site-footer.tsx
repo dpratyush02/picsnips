@@ -18,7 +18,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border/70">
         <p className="mx-auto max-w-6xl px-6 py-4 text-xs leading-5 text-muted-foreground">
-          PicSnap is an independent tool and is not affiliated with X Corp. Images are processed in your browser and are not uploaded to PicSnap.
+          PicSnips is an independent tool and is not affiliated with X Corp. Images are processed in your browser and are not uploaded to PicSnips.
         </p>
       </div>
     </footer>
