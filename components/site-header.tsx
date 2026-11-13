@@ -8,8 +8,10 @@ import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 
 const links = [
+  { href: "/#demo", label: "Demo" },
+  { href: "/#library", label: "Library" },
+  { href: "/#examples", label: "Real Posts" },
   { href: "/#how", label: "How It Works" },
-  { href: "/#examples", label: "Examples" },
 ];
 
 export function SiteHeader() {
@@ -30,7 +32,7 @@ export function SiteHeader() {
         </nav>
         <div className="flex items-center gap-2">
           <Button asChild className="rounded-full px-4">
-            <Link href="/#splitter">Launch App</Link>
+            <Link href="/#splitter">Split an Image</Link>
           </Button>
           <button
             type="button"

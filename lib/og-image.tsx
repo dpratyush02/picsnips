@@ -10,34 +10,116 @@ export function OgImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#09090b",
+          background: "linear-gradient(135deg, #09090b 0%, #111116 50%, #1a100a 100%)",
           color: "white",
-          padding: "64px",
-          fontFamily: "sans-serif",
+          padding: "56px 64px",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          position: "relative",
         }}
       >
-        <div style={{ display: "flex", gap: "8px" }}>
-          {Array.from({ length: 20 }, (_, index) => (
+        {/* Top Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <div
-              key={index}
               style={{
-                width: "18px",
-                height: "72px",
-                borderRadius: "4px",
-                background: `rgba(255,255,255,${0.25 + (index % 5) * 0.12})`,
+                width: "48px",
+                height: "48px",
+                borderRadius: "14px",
+                background: "linear-gradient(135deg, #f97316 0%, #fb923c 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 800,
+                fontSize: "26px",
+                color: "#000",
               }}
-            />
-          ))}
+            >
+              ✂
+            </div>
+            <div style={{ fontSize: "32px", fontWeight: 800, letterSpacing: "-0.03em" }}>
+              PicSnips
+            </div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px 20px",
+              borderRadius: "999px",
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              fontSize: "18px",
+              color: "#fb923c",
+              fontWeight: 600,
+            }}
+          >
+            Built for X&apos;s 20-Image Posts
+          </div>
         </div>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ fontSize: 28, letterSpacing: "0.08em", color: "#a1a1aa" }}>
-            TWENTYSPLIT
+
+        {/* 20-Slice Visual Ribbon */}
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            height: "130px",
+            gap: "5px",
+            borderRadius: "16px",
+            overflow: "hidden",
+            padding: "8px",
+            background: "rgba(0, 0, 0, 0.6)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+          }}
+        >
+          {Array.from({ length: 20 }, (_, index) => {
+            const hue = 15 + index * 10;
+            return (
+              <div
+                key={index}
+                style={{
+                  flex: 1,
+                  height: "100%",
+                  borderRadius: "6px",
+                  background: `linear-gradient(180deg, hsl(${hue}, 85%, 60%) 0%, hsl(${hue + 25}, 80%, 40%) 100%)`,
+                  display: "flex",
+                  alignItems: "flex-end",
+                  justifyContent: "center",
+                  paddingBottom: "6px",
+                  fontSize: "11px",
+                  fontFamily: "monospace",
+                  color: "rgba(255, 255, 255, 0.9)",
+                  fontWeight: 700,
+                }}
+              >
+                {String(index + 1).padStart(2, "0")}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bottom Headline & Callout */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div
+            style={{
+              fontSize: "56px",
+              fontWeight: 800,
+              letterSpacing: "-0.04em",
+              lineHeight: 1.1,
+              background: "linear-gradient(180deg, #ffffff 30%, #d4d4d8 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              color: "transparent",
+            }}
+          >
+            One Image. 20 Slices. One Epic Post.
           </div>
-          <div style={{ fontSize: 68, fontWeight: 650, letterSpacing: "-0.04em", marginTop: 16, lineHeight: 1.05 }}>
-            One image. Twenty pieces.
-          </div>
-          <div style={{ fontSize: 28, color: "#d4d4d8", marginTop: 20 }}>
-            Free 20-image splitter for X
+          <div style={{ display: "flex", alignItems: "center", gap: "24px", fontSize: "20px", color: "#a1a1aa" }}>
+            <span>⚡ Instant Client-Side Slicing</span>
+            <span>•</span>
+            <span>🔒 100% Private (No Uploads)</span>
+            <span>•</span>
+            <span>📦 Auto-Numbered ZIP</span>
           </div>
         </div>
       </div>

@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Raw media / temp files
+lv_0_*.mp4
+/image-library/
+scratch_*.json

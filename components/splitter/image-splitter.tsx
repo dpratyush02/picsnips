@@ -445,6 +445,31 @@ function SplitterTool() {
     }
   }
 
+  useEffect(() => {
+    async function handleCustomLoad(event: Event) {
+      const customEvent = event as CustomEvent<{ src: string; name?: string }>;
+      const { src, name } = customEvent.detail || {};
+      if (!src) return;
+      setMakingSample(true);
+      try {
+        const res = await fetch(src);
+        if (!res.ok) throw new Error("Failed to fetch image");
+        const blob = await res.blob();
+        const filename = name || "preset-panorama.png";
+        const file = new File([blob], filename, { type: blob.type || "image/png" });
+        await ingest(file);
+        document.getElementById("splitter")?.scrollIntoView({ behavior: "smooth" });
+      } catch {
+        toast.error("Could not load selected image.");
+      } finally {
+        setMakingSample(false);
+      }
+    }
+
+    window.addEventListener("picsnips:load-image", handleCustomLoad);
+    return () => window.removeEventListener("picsnips:load-image", handleCustomLoad);
+  }, [ingest]);
+
   async function downloadZip() {
     if (phase !== "ready" || pieces.length === 0 || !source) return;
     setZipping(true);
@@ -593,7 +618,7 @@ function SplitterTool() {
             Browse files
           </span>
         </div>
-        <div className="flex justify-center">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <Button
             type="button"
             variant="outline"
@@ -601,7 +626,14 @@ function SplitterTool() {
             disabled={makingSample || phase === "reading"}
             onClick={() => void loadSample()}
           >
-            {makingSample ? "Creating sample…" : "Try a sample panorama"}
+            {makingSample ? "Creating sample…" : "Try sample panorama"}
+          </Button>
+          <Button
+            asChild
+            variant="ghost"
+            className="rounded-full px-4 text-muted-foreground hover:text-foreground border border-white/5 bg-white/[0.03]"
+          >
+            <a href="#library">Browse Stock Library (15+)</a>
           </Button>
         </div>
         </div>

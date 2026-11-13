@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { sceneSrc, scenes } from "@/components/scenes";
+import { scenes } from "@/components/scenes";
 import { Button } from "@/components/ui/button";
 
 export function Hero() {
   const reduce = useReducedMotion();
-  const src = sceneSrc(scenes[0]);
 
   return (
     <section className="px-6 pt-16 pb-8 sm:pt-24">
@@ -31,7 +30,10 @@ export function Hero() {
               <Link href="/#splitter">Start Splitting — It&apos;s Free</Link>
             </Button>
             <Button asChild variant="outline" className="h-12 rounded-full px-6 text-[15px]">
-              <Link href="/#examples">See examples</Link>
+              <Link href="/#demo">Watch Demo Video</Link>
+            </Button>
+            <Button asChild variant="ghost" className="h-12 rounded-full px-5 text-[15px] text-muted-foreground hover:text-foreground">
+              <Link href="/#library">Stock Library</Link>
             </Button>
           </div>
         </motion.div>
@@ -44,22 +46,30 @@ export function Hero() {
         >
           <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,rgba(251,146,60,0.16),transparent_65%)]" />
           <div className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-black shadow-[0_40px_120px_-48px_rgba(0,0,0,0.9)]">
-            <div className="hero-strips flex h-64 w-full sm:h-80">
-              {Array.from({ length: 20 }, (_, index) => (
+            <div className="hero-strips flex h-64 w-full sm:h-80 gap-0.5 bg-black">
+              {scenes[0].slices.map((sliceUrl, index) => (
                 <div
                   key={index}
-                  className="h-full min-w-0 flex-1 bg-no-repeat"
+                  className="h-full min-w-0 flex-1 bg-cover bg-center"
                   style={{
-                    backgroundImage: `url("${src}")`,
-                    backgroundSize: "2000% 100%",
-                    backgroundPosition: `${(index / 19) * 100}% 50%`,
+                    backgroundImage: `url("${sliceUrl}")`,
                   }}
                 />
               ))}
             </div>
             <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-xs text-muted-foreground">
-              <span>One panorama</span>
-              <span className="font-mono">01 → 20</span>
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
+                <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                Real X Post: Spider-Man 20-Piece Split
+              </span>
+              <a
+                href={scenes[0].tweetUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="font-mono text-xs hover:text-white transition"
+              >
+                01 → 20 • View on X ↗
+              </a>
             </div>
           </div>
         </motion.div>
