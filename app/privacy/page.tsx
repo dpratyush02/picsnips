@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site";
 import { Legal } from "@/components/legal";
 import { SiteFrame } from "@/components/site-frame";
 
@@ -6,6 +7,9 @@ export const metadata: Metadata = {
   title: "Privacy",
   description:
     "PicSnips processes images in your browser. They are not uploaded, stored, or used to train anything.",
+  alternates: {
+    canonical: `${siteUrl}/privacy`,
+  },
 };
 
 export default function PrivacyPage() {

@@ -103,9 +103,10 @@ export function ImageSplitter() {
     <section id="splitter" className="scroll-mt-24 px-6 py-10 sm:py-16">
       <div className="mx-auto max-w-6xl">
         <SectionHeading
-          eyebrow="The splitter"
-          title="Drop one image. Take twenty with you."
-          body="Cuts happen in your browser. The file is never uploaded, and the pieces stay in the order X expects."
+          as="h1"
+          eyebrow="The Splitter"
+          title="Free Image Splitter for X"
+          body="Cuts happen in your browser. The file is never uploaded, and the pieces stay in the exact numerical order X expects."
         />
         <div className="mt-12">
           <ToolErrorBoundary>
@@ -635,6 +636,19 @@ function SplitterTool() {
           <span className="mt-6 inline-flex h-8 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground">
             Browse files
           </span>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1 font-medium text-emerald-400">
+              <Check className="size-3.5" />
+              Free to use
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="inline-flex items-center gap-1 font-medium text-emerald-400">
+              <Check className="size-3.5" />
+              No signup required
+            </span>
+            <span className="text-white/20">•</span>
+            <span>100% In-Browser</span>
+          </div>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Button

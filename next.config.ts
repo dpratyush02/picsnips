@@ -7,6 +7,17 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "picsnips.site",
+          },
+        ],
+        destination: "https://www.picsnips.site/:path*",
+        permanent: true,
+      },
+      {
         source: "/app",
         destination: "/split",
         permanent: true,

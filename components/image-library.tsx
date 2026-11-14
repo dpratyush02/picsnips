@@ -47,8 +47,9 @@ export function ImageLibrary() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
       <SectionHeading
+        as="h1"
         eyebrow="Curated Collection"
-        title="15+ 4K Wallpapers & Panoramas"
+        title="Stock & Preset Images"
         body="Pick any image below. Click 'Split in App' to load it directly into the 20-image splitter with zero upload required."
       />
 

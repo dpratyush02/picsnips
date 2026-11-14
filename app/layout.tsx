@@ -32,12 +32,11 @@ export const metadata: Metadata = {
     "X panoramic post maker",
     "PicSnips",
   ],
-  alternates: { canonical: "/" },
   openGraph: {
     title,
     description: seoDescription,
     type: "website",
-    url: "/",
+    url: `${siteUrl}/`,
     siteName,
   },
   twitter: {
@@ -53,20 +52,12 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-const jsonLd = {
+const websiteJsonLd = {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
+  "@type": "WebSite",
   name: siteName,
-  applicationCategory: "MultimediaApplication",
-  operatingSystem: "Any",
-  url: siteUrl,
+  url: `${siteUrl}/`,
   description: seoDescription,
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
-  },
-  browserRequirements: "Requires a modern browser with HTML canvas",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -78,7 +69,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         {children}
         <Toaster />

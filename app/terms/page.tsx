@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site";
 import { Legal } from "@/components/legal";
 import { SiteFrame } from "@/components/site-frame";
 
@@ -6,6 +7,9 @@ export const metadata: Metadata = {
   title: "Terms",
   description:
     "Terms for using PicSnips, a free browser-based image splitter for X posts.",
+  alternates: {
+    canonical: `${siteUrl}/terms`,
+  },
 };
 
 export default function TermsPage() {
