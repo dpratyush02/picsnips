@@ -10,8 +10,9 @@ export function SiteFooter() {
           <p className="mt-3 text-sm text-muted-foreground">Made for creators on X</p>
         </div>
         <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground" aria-label="Footer">
-          <Link href="/#demo" className="hover:text-foreground">Demo</Link>
+          <Link href="/split" className="hover:text-foreground">Splitter</Link>
           <Link href="/library" className="hover:text-foreground">Library</Link>
+          <Link href="/#demo" className="hover:text-foreground">Demo</Link>
           <Link href="/#examples" className="hover:text-foreground">Real Posts</Link>
           <Link href="/#how" className="hover:text-foreground">How It Works</Link>
           <Link href="/privacy" className="hover:text-foreground">Privacy</Link>

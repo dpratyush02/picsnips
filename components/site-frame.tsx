@@ -7,7 +7,7 @@ export function SiteFrame({ children }: { children: ReactNode }) {
   return (
     <>
       <Link
-        href="/#splitter"
+        href="/split"
         className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-foreground focus:px-4 focus:py-2 focus:text-background"
       >
         Skip to the splitter

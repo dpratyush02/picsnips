@@ -100,7 +100,7 @@ function orderHint(rows: number, cols: number, count: number): string {
 
 export function ImageSplitter() {
   return (
-    <section id="splitter" className="scroll-mt-24 px-6 py-20 sm:py-28">
+    <section id="splitter" className="scroll-mt-24 px-6 py-10 sm:py-16">
       <div className="mx-auto max-w-6xl">
         <SectionHeading
           eyebrow="The splitter"

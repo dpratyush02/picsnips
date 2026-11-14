@@ -27,7 +27,7 @@ export function Hero() {
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild className="h-12 rounded-full px-6 text-[15px]">
-              <Link href="/#splitter">Start Splitting — It&apos;s Free</Link>
+              <Link href="/split">Start Splitting — It&apos;s Free</Link>
             </Button>
             <Button asChild variant="outline" className="h-12 rounded-full px-6 text-[15px]">
               <Link href="/#demo">Watch Demo Video</Link>

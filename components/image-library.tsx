@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Scissors, Search } from "lucide-react";
@@ -25,7 +26,7 @@ export function ImageLibrary() {
 
   const handleSelectImage = (item: LibraryItem) => {
     if (typeof window !== "undefined") {
-      if (window.location.pathname === "/") {
+      if (window.location.pathname === "/split") {
         window.dispatchEvent(
           new CustomEvent("picsnips:load-image", {
             detail: {
@@ -37,7 +38,7 @@ export function ImageLibrary() {
         document.getElementById("splitter")?.scrollIntoView({ behavior: "smooth" });
       } else {
         router.push(
-          `/?image=${encodeURIComponent(item.src)}&name=${encodeURIComponent(item.title)}#splitter`
+          `/split?image=${encodeURIComponent(item.src)}&name=${encodeURIComponent(item.title)}`
         );
       }
     }
@@ -184,19 +185,12 @@ export function ImageLibrary() {
       <div className="mt-12 rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-muted-foreground bg-white/[0.01]">
         <p>
           Want to split your own image instead?{" "}
-          <button
-            type="button"
-            onClick={() => {
-              if (window.location.pathname === "/") {
-                document.getElementById("splitter")?.scrollIntoView({ behavior: "smooth" });
-              } else {
-                router.push("/#splitter");
-              }
-            }}
+          <Link
+            href="/split"
             className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
           >
             Launch the splitter tool
-          </button>
+          </Link>
           .
         </p>
       </div>

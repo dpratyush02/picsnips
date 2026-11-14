@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize2, Sparkles } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
@@ -147,10 +148,10 @@ export function DemoVideo() {
 
         <div className="mt-8 flex justify-center">
           <Button asChild size="lg" className="rounded-full px-6 gap-2">
-            <a href="#splitter">
+            <Link href="/split">
               <Sparkles className="size-4" />
               Try it now on your own picture
-            </a>
+            </Link>
           </Button>
         </div>
       </div>

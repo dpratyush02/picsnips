@@ -9,11 +9,16 @@ export default function NotFound() {
         <p className="text-sm text-muted-foreground">404</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight">This page doesn&apos;t exist.</h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          The splitter is still on the home page.
+          Looking to slice an image or explore the presets?
         </p>
-        <Button asChild className="mt-6 rounded-full px-5">
-          <Link href="/">Back home</Link>
-        </Button>
+        <div className="mt-6 flex items-center gap-3">
+          <Button asChild className="rounded-full px-5">
+            <Link href="/split">Open Splitter</Link>
+          </Button>
+          <Button asChild variant="outline" className="rounded-full px-5">
+            <Link href="/">Back Home</Link>
+          </Button>
+        </div>
       </main>
     </SiteFrame>
   );
