@@ -30,7 +30,7 @@ export const scenes: Scene[] = [
   },
   {
     id: "sunset",
-    title: "Sunset Anime Landscape",
+    title: "Cosmic Pathway to Black Hole",
     caption: "Made this for free in just one click — Try it yourself > picsnips.site",
     tweetUrl: "https://x.com/dpratyush02/status/2121293695433781312",
     tweetId: "2121293695433781312",
@@ -44,7 +44,7 @@ export const scenes: Scene[] = [
   },
   {
     id: "skyline",
-    title: "Cyberpunk Skyline",
+    title: "Sunrise Over Mars Craters",
     caption: "20 images huh.......",
     tweetUrl: "https://x.com/dpratyush02/status/2121219106066313642",
     tweetId: "2121219106066313642",
