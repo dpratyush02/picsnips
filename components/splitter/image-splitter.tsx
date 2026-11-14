@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -467,6 +468,23 @@ function SplitterTool() {
     }
 
     window.addEventListener("picsnips:load-image", handleCustomLoad);
+
+    // Auto-load if navigated with ?image= from library page
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const imgParam = params.get("image");
+      const nameParam = params.get("name") || "library-preset.png";
+      if (imgParam) {
+        handleCustomLoad(
+          new CustomEvent("picsnips:load-image", {
+            detail: { src: imgParam, name: nameParam },
+          })
+        );
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+
     return () => window.removeEventListener("picsnips:load-image", handleCustomLoad);
   }, [ingest]);
 
@@ -633,7 +651,7 @@ function SplitterTool() {
             variant="ghost"
             className="rounded-full px-4 text-muted-foreground hover:text-foreground border border-white/5 bg-white/[0.03]"
           >
-            <a href="#library">Browse Stock Library (15+)</a>
+            <Link href="/library">Browse Stock Library (15+)</Link>
           </Button>
         </div>
         </div>

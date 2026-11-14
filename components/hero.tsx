@@ -33,7 +33,7 @@ export function Hero() {
               <Link href="/#demo">Watch Demo Video</Link>
             </Button>
             <Button asChild variant="ghost" className="h-12 rounded-full px-5 text-[15px] text-muted-foreground hover:text-foreground">
-              <Link href="/#library">Stock Library</Link>
+              <Link href="/library">Stock Library</Link>
             </Button>
           </div>
         </motion.div>

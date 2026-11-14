@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useReducedMotion } from "framer-motion";
-import { ExternalLink, Scissors } from "lucide-react";
+import { ExternalLink, Scissors, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "cn";
 import { SectionHeading } from "@/components/section-heading";
 import { sceneSrc, scenes, type Scene } from "@/components/scenes";
@@ -10,7 +10,18 @@ import { Button } from "@/components/ui/button";
 
 export function Examples() {
   const [active, setActive] = useState(scenes[0].id);
-  const scene = scenes.find((item) => item.id === active) ?? scenes[0];
+  const currentIndex = scenes.findIndex((item) => item.id === active);
+  const scene = scenes[currentIndex] ?? scenes[0];
+
+  const goPrev = useCallback(() => {
+    const nextIdx = (currentIndex - 1 + scenes.length) % scenes.length;
+    setActive(scenes[nextIdx].id);
+  }, [currentIndex]);
+
+  const goNext = useCallback(() => {
+    const nextIdx = (currentIndex + 1) % scenes.length;
+    setActive(scenes[nextIdx].id);
+  }, [currentIndex]);
 
   const handleLoadInSplitter = () => {
     if (typeof window !== "undefined") {
@@ -31,90 +42,170 @@ export function Examples() {
         <SectionHeading
           eyebrow="Real Posts on X"
           title="See how 20-image posts look on X."
-          body="Actual 20-slice posts published on X. Drag the comparison slider to see the seamless transition from the full original picture to the 20 vertical slices."
+          body="Actual 20-slice posts published on X. Use the arrows to browse posts, and drag the comparison slider to see the seamless transition from full panorama to 20 slices."
         />
 
-        {/* Tab pills */}
-        <div className="mt-8 flex flex-wrap justify-center gap-2" role="tablist" aria-label="Example posts">
-          {scenes.map((item) => (
-            <button
-              key={item.id}
+        {/* Post Switcher with Arrows & Tabs */}
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Tabs */}
+          <div className="flex flex-wrap items-center justify-center gap-2" role="tablist" aria-label="Example posts">
+            {scenes.map((item, idx) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={item.id === scene.id}
+                onClick={() => setActive(item.id)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm transition font-medium",
+                  item.id === scene.id
+                    ? "border-foreground bg-foreground text-background shadow-md"
+                    : "border-border text-muted-foreground hover:text-foreground hover:bg-white/5",
+                )}
+              >
+                <span className="opacity-60 mr-1.5 font-mono text-xs">0{idx + 1}</span>
+                {item.title}
+              </button>
+            ))}
+          </div>
+
+          {/* Arrow Buttons & Counter */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono text-muted-foreground mr-2">
+              Post {currentIndex + 1} of {scenes.length}
+            </span>
+            <Button
               type="button"
-              role="tab"
-              aria-selected={item.id === scene.id}
-              onClick={() => setActive(item.id)}
-              className={cn(
-                "rounded-full border px-4 py-2 text-sm transition font-medium",
-                item.id === scene.id
-                  ? "border-foreground bg-foreground text-background shadow-md"
-                  : "border-border text-muted-foreground hover:text-foreground hover:bg-white/5",
-              )}
+              variant="outline"
+              size="icon"
+              onClick={goPrev}
+              className="size-9 rounded-full border-border/80 hover:bg-white/10"
+              aria-label="Previous post"
             >
-              {item.title}
-            </button>
-          ))}
+              <ChevronLeft className="size-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={goNext}
+              className="size-9 rounded-full border-border/80 hover:bg-white/10"
+              aria-label="Next post"
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
         </div>
 
-        {/* Post Container Card */}
-        <div className="mt-8 overflow-hidden rounded-[1.8rem] border border-white/10 bg-card/60 p-4 sm:p-6 shadow-2xl backdrop-blur-md">
-          {/* Twitter / X Post Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 pb-4">
-            <div className="flex items-center gap-3">
-              <img
-                src={scene.authorAvatar}
-                alt={scene.authorName}
-                className="size-11 rounded-full border border-white/10 object-cover bg-white/5"
-              />
-              <div>
-                <div className="flex items-center gap-1.5 font-semibold text-foreground text-sm">
-                  <span>{scene.authorName}</span>
-                  {/* Verified check */}
-                  <svg viewBox="0 0 24 24" aria-label="Verified account" className="size-4 fill-sky-400">
-                    <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.79-4-4-4-.495 0-.965.084-1.4.238C14.55 2.475 13.18 1.6 11.6 1.6c-1.58 0-2.95.875-3.6 2.148-.435-.154-.905-.238-1.4-.238-2.21 0-4 1.79-4 4 0 .495.084.965.238 1.4C1.475 9.85.6 11.22.6 12.8c0 1.58.875 2.95 2.148 3.6-.154.435-.238.905-.238 1.4 0 2.21 1.79 4 4 4 .495 0 .965-.084 1.4-.238 1.05 1.273 2.42 2.148 4 2.148 1.58 0 2.95-.875 3.6-2.148.435.154.905.238 1.4.238 2.21 0 4-1.79 4-4 0-.495-.084-.965-.238-1.4 1.273-1.05 2.148-2.42 2.148-4zM10.2 16.2l-3.5-3.5 1.4-1.4 2.1 2.1 5.3-5.3 1.4 1.4-6.7 6.7z" />
-                  </svg>
-                  <span className="text-xs text-muted-foreground font-normal">@{scene.authorHandle}</span>
+        {/* Post Container Card with Side Floating Arrows */}
+        <div className="relative mt-6">
+          {/* Left Arrow Floating Button */}
+          <button
+            type="button"
+            onClick={goPrev}
+            className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-30 size-11 items-center justify-center rounded-full border border-white/20 bg-black/80 text-white/90 shadow-2xl backdrop-blur-md hover:bg-black hover:scale-110 hover:text-white transition"
+            aria-label="Previous post"
+          >
+            <ChevronLeft className="size-5" />
+          </button>
+
+          {/* Right Arrow Floating Button */}
+          <button
+            type="button"
+            onClick={goNext}
+            className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-30 size-11 items-center justify-center rounded-full border border-white/20 bg-black/80 text-white/90 shadow-2xl backdrop-blur-md hover:bg-black hover:scale-110 hover:text-white transition"
+            aria-label="Next post"
+          >
+            <ChevronRight className="size-5" />
+          </button>
+
+          <div className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-card/60 p-4 sm:p-6 shadow-2xl backdrop-blur-md">
+            {/* Twitter / X Post Header */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <img
+                  src={scene.authorAvatar}
+                  alt={scene.authorName}
+                  className="size-11 rounded-full border border-white/10 object-cover bg-white/5"
+                />
+                <div>
+                  <div className="flex items-center gap-1.5 font-semibold text-foreground text-sm">
+                    <span>{scene.authorName}</span>
+                    <svg viewBox="0 0 24 24" aria-label="Verified account" className="size-4 fill-sky-400">
+                      <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.79-4-4-4-.495 0-.965.084-1.4.238C14.55 2.475 13.18 1.6 11.6 1.6c-1.58 0-2.95.875-3.6 2.148-.435-.154-.905-.238-1.4-.238-2.21 0-4 1.79-4 4 0 .495.084.965.238 1.4C1.475 9.85.6 11.22.6 12.8c0 1.58.875 2.95 2.148 3.6-.154.435-.238.905-.238 1.4 0 2.21 1.79 4 4 4 .495 0 .965-.084 1.4-.238 1.05 1.273 2.42 2.148 4 2.148 1.58 0 2.95-.875 3.6-2.148.435.154.905.238 1.4.238 2.21 0 4-1.79 4-4 0-.495-.084-.965-.238-1.4 1.273-1.05 2.148-2.42 2.148-4zM10.2 16.2l-3.5-3.5 1.4-1.4 2.1 2.1 5.3-5.3 1.4 1.4-6.7 6.7z" />
+                    </svg>
+                    <span className="text-xs text-muted-foreground font-normal">@{scene.authorHandle}</span>
+                  </div>
+                  <p className="text-sm text-foreground/90 mt-0.5">{scene.caption}</p>
                 </div>
-                <p className="text-sm text-foreground/90 mt-0.5">{scene.caption}</p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLoadInSplitter}
+                  className="rounded-full gap-1.5 text-xs"
+                >
+                  <Scissors className="size-3.5" />
+                  Load in Splitter
+                </Button>
+                <Button
+                  asChild
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-full gap-1.5 text-xs bg-white/10 hover:bg-white/20 text-white"
+                >
+                  <a href={scene.tweetUrl} target="_blank" rel="noreferrer">
+                    <span>View on X</span>
+                    <ExternalLink className="size-3.5" />
+                  </a>
+                </Button>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleLoadInSplitter}
-                className="rounded-full gap-1.5 text-xs"
-              >
-                <Scissors className="size-3.5" />
-                Load in Splitter
-              </Button>
-              <Button
-                asChild
-                variant="secondary"
-                size="sm"
-                className="rounded-full gap-1.5 text-xs bg-white/10 hover:bg-white/20 text-white"
-              >
-                <a href={scene.tweetUrl} target="_blank" rel="noreferrer">
-                  <span>View on X</span>
-                  <ExternalLink className="size-3.5" />
-                </a>
-              </Button>
+            {/* Interactive Comparison Component */}
+            <div className="mt-4">
+              <Compare key={scene.id} scene={scene} />
             </div>
-          </div>
 
-          {/* Interactive Comparison Component */}
-          <div className="mt-4">
-            <Compare key={scene.id} scene={scene} />
-          </div>
+            {/* Footer stats bar with mobile Prev / Next buttons */}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground pt-3 border-t border-white/5">
+              <div className="flex items-center gap-2">
+                <span className="font-mono">20 vertical frames on X</span>
+                <span className="text-white/20">•</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-emerald-400" />
+                  Made with PicSnips
+                </span>
+              </div>
 
-          {/* Footer stats bar */}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground pt-3 border-t border-white/5">
-            <span className="font-mono">Total slices: 20 vertical frames</span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-emerald-400" />
-              Published with PicSnips
-            </span>
+              {/* Mobile prev/next navigation bar */}
+              <div className="flex md:hidden items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={goPrev}
+                  className="h-8 px-2.5 text-xs gap-1"
+                >
+                  <ChevronLeft className="size-3.5" />
+                  Prev
+                </Button>
+                <span className="font-mono text-[11px]">{currentIndex + 1} / {scenes.length}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={goNext}
+                  className="h-8 px-2.5 text-xs gap-1"
+                >
+                  Next
+                  <ChevronRight className="size-3.5" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

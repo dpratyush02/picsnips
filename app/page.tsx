@@ -4,7 +4,7 @@ import { DemoVideo } from "@/components/demo-video";
 import { HowItWorks } from "@/components/how-it-works";
 import { SiteFrame } from "@/components/site-frame";
 import { ImageSplitter } from "@/components/splitter/image-splitter";
-import { ImageLibrary } from "@/components/image-library";
+import { LibraryTeaser } from "@/components/library-teaser";
 import { Examples } from "@/components/examples";
 
 export default function HomePage() {
@@ -14,7 +14,7 @@ export default function HomePage() {
         <Hero />
         <DemoVideo />
         <ImageSplitter />
-        <ImageLibrary />
+        <LibraryTeaser />
         <Examples />
         <HowItWorks />
         <Faq />
