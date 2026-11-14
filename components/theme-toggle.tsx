@@ -71,6 +71,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     <button
       ref={buttonRef}
       type="button"
+      data-ink-live=""
       onClick={handleClick}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode (Press T)`}
       title={`Switch to ${isDark ? "light" : "dark"} mode (Press T)`}

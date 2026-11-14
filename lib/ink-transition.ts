@@ -5,6 +5,9 @@
  * Implements a WebGL2 procedural ink-spread transition between light and dark themes
  * with organic domain-warped FBM noise, branching tendril filaments, paper fibres,
  * diffusion haze, speckles, and pigment pooling.
+ *
+ * The transition samples two full-page snapshots (uFrom and uTo) so the actual page content
+ * (text, buttons, cards, images) is revealed in real-time inside the expanding ink wavefront.
  */
 
 export type Theme = "light" | "dark";
@@ -100,22 +103,28 @@ const INK_FRAG = /* glsl */ `#version 300 es
 precision highp float;
 precision highp int;
 
-uniform vec3 uTargetColor;
-uniform float uCanvasScale;
-uniform vec2 uRes;
-uniform vec2 uCenter;
-uniform float uRadius;
-uniform float uCleanup;
-uniform float uTime;
-uniform float uRef;
+uniform sampler2D uFrom;
+uniform sampler2D uTo;
+uniform vec2 uFromSize;     // texture px
+uniform vec2 uToSize;       // texture px
+uniform vec4 uFromMap;      // (texture px per device px, offset x, offset y, flipY)
+uniform vec4 uToMap;
+uniform float uCanvasScale; // device px per CSS px
+uniform vec2 uRes;          // canvas device px
+
+uniform vec2 uCenter;       // CSS px, viewport-relative
+uniform float uRadius;      // CSS px, eased base radius
+uniform float uCleanup;     // CSS px, extra uniform reach that guarantees full coverage at the end
+uniform float uTime;        // seconds since click
+uniform float uRef;         // CSS px, noise reference length (max viewport side)
 uniform vec2 uSeed;
 uniform mat2 uSeedRot;
 
-uniform float uTendril;
-uniform float uNoiseScale;
-uniform float uSoftness;
-uniform float uDrift;
-uniform vec3 uRimColor;
+uniform float uTendril;     // tendril intensity, 0..2
+uniform float uNoiseScale;  // noise frequency multiplier
+uniform float uSoftness;    // frontier half-width, CSS px
+uniform float uDrift;       // time evolution speed
+uniform vec3 uRimColor;     // pigment colour pooled at the frontier
 
 out vec4 outColor;
 
@@ -159,6 +168,13 @@ float fbm5(vec2 p) {
   return s / 0.96875;
 }
 
+vec3 sampleDoc(sampler2D tex, vec2 size, vec4 map, vec2 devPx) {
+  vec2 texPx = devPx * map.x + map.yz;
+  if (map.w > 0.5) texPx.y = size.y - texPx.y;
+  vec2 uv = clamp(texPx, vec2(0.5), size - 0.5) / size;
+  return texture(tex, uv).rgb;
+}
+
 void main() {
   vec2 devPx = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
   vec2 css = devPx / uCanvasScale;
@@ -169,13 +185,13 @@ void main() {
 
   float inner = R * (1.0 - A_SUM) + cleanup - FIBRE_PX - THIN_MAX_PX - uSoftness * 2.0;
   float outer = R * (1.0 + A_SUM) * (1.0 + TENDRIL_REACH * uTendril) + cleanup + FIBRE_PX + SPECK_PX + uSoftness * 2.0;
-  
+
   if (d < inner) {
-    outColor = vec4(uTargetColor, 1.0);
+    outColor = vec4(sampleDoc(uTo, uToSize, uToMap, devPx), 1.0);
     return;
   }
   if (d > outer) {
-    outColor = vec4(0.0);
+    outColor = vec4(sampleDoc(uFrom, uFromSize, uFromMap, devPx), 1.0);
     return;
   }
 
@@ -233,84 +249,190 @@ void main() {
     cov = max(cov, smoothstep(th, th + 0.04, sn) * 0.75 * (1.0 - ahead));
   }
 
+  vec3 from = sampleDoc(uFrom, uFromSize, uFromMap, devPx);
+  vec3 to = sampleDoc(uTo, uToSize, uToMap, devPx);
+  vec3 col = mix(from, to, cov);
+
   float rimX = (f + soft * 1.1) / (soft * 1.4 + 1.2);
   float rim = exp(-rimX * rimX) * inked;
-  vec3 col = mix(uTargetColor, uRimColor, rim * 0.45);
+  col = mix(col, uRimColor, rim * 0.45);
 
-  outColor = vec4(col, cov);
+  outColor = vec4(col, 1.0);
 }
 `;
 
-const TARGET_COLORS: Record<Theme, [number, number, number]> = {
-  dark: [0.055, 0.055, 0.07], // deep dark tone matching dark mode
-  light: [0.99, 0.985, 0.98], // soft warm cream white matching light mode
-};
-
-const RIM_COLORS: Record<Theme, [number, number, number]> = {
+export const RIM_COLOR: Record<Theme, [number, number, number]> = {
   dark: [0.0, 0.0, 0.01],
   light: [1.0, 0.996, 0.985],
 };
 
-const SPREAD = {
-  growth: 0.75,
+const BACKGROUND: Record<Theme, string> = {
+  light: "#fbfaf7",
+  dark: "#0d0d12",
+};
+
+export const SPREAD = {
+  growth: 0.72,
   cleanupFrom: 0.45,
   cleanupReach: 0.4,
   cleanupPow: 2,
 };
 
-function farthestCorner(p: Point): number {
-  if (typeof window === "undefined") return 1000;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  return (
-    Math.max(
-      Math.hypot(p.x, p.y),
-      Math.hypot(w - p.x, p.y),
-      Math.hypot(p.x, h - p.y),
-      Math.hypot(w - p.x, h - p.y)
-    ) + 12
-  );
+export interface Snapshot {
+  theme: Theme;
+  canvas: HTMLCanvasElement;
+  scale: number;
+  key: string;
+  ms: number;
 }
 
-class InkTransitionManager {
-  private canvas: HTMLCanvasElement | null = null;
-  private gl: WebGL2RenderingContext | null = null;
-  private program: WebGLProgram | null = null;
-  private vao: WebGLVertexArrayObject | null = null;
-  private noiseTex: WebGLTexture | null = null;
-  private uniforms = new Map<string, WebGLUniformLocation>();
-  private animId: number | null = null;
-  private isAnimating = false;
+interface ThemeTexture {
+  texture: WebGLTexture;
+  width: number;
+  height: number;
+  scale: number;
+  key: string;
+}
 
-  init(canvas: HTMLCanvasElement): void {
-    this.canvas = canvas;
+interface CompositeTexture {
+  texture: WebGLTexture;
+  framebuffer: WebGLFramebuffer;
+  width: number;
+  height: number;
+  scrollX: number;
+  scrollY: number;
+}
+
+export type InkSource = Theme | "composite";
+
+export interface InkFrame {
+  from: InkSource;
+  to: Theme;
+  center: Point;
+  progress: number;
+  radius: number;
+  cleanup: number;
+  maxDist: number;
+  time: number;
+  seed: { x: number; y: number; angle: number };
+}
+
+interface Sampler {
+  texture: WebGLTexture;
+  width: number;
+  height: number;
+  ratio: number;
+  offsetX: number;
+  offsetY: number;
+  flipY: boolean;
+}
+
+function isCoarsePointer(): boolean {
+  return typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+}
+
+export function renderScale(): number {
+  if (typeof window === "undefined") return 1;
+  const cap = isCoarsePointer() ? 1.5 : 2;
+  return Math.min(window.devicePixelRatio || 1, cap);
+}
+
+export function documentSize(): { width: number; height: number } {
+  if (typeof document === "undefined") return { width: 1200, height: 800 };
+  const el = document.documentElement;
+  return { width: el.clientWidth, height: Math.max(el.scrollHeight, el.clientHeight) };
+}
+
+export function layoutKey(scale: number): string {
+  const { width, height } = documentSize();
+  return `${width}x${height}@${scale}`;
+}
+
+export async function capturePage(
+  theme: Theme,
+  scale: number,
+  maxTextureSize: number
+): Promise<Snapshot> {
+  const t0 = performance.now();
+  const key = layoutKey(scale);
+  const { width, height } = documentSize();
+  const safeScale = Math.min(scale, maxTextureSize / width, maxTextureSize / height);
+
+  const html2canvas = (await import("html2canvas")).default;
+  const canvas = await html2canvas(document.body, {
+    scale: safeScale,
+    backgroundColor: BACKGROUND[theme],
+    x: 0,
+    y: 0,
+    width,
+    height,
+    scrollX: 0,
+    scrollY: 0,
+    windowWidth: width,
+    windowHeight: document.documentElement.clientHeight,
+    logging: false,
+    useCORS: true,
+    onclone: (doc) => {
+      doc.documentElement.dataset.theme = theme;
+      if (theme === "dark") {
+        doc.documentElement.classList.add("dark");
+      } else {
+        doc.documentElement.classList.remove("dark");
+      }
+      doc.querySelectorAll<HTMLElement>("[data-ink-live]").forEach((el) => {
+        el.style.visibility = "hidden";
+      });
+      const inkCanvas = doc.querySelector(".ink-canvas");
+      if (inkCanvas) (inkCanvas as HTMLElement).style.display = "none";
+    },
+  });
+
+  return { theme, canvas, scale: safeScale, key, ms: performance.now() - t0 };
+}
+
+export class InkRenderer {
+  readonly canvas: HTMLCanvasElement;
+  readonly maxTextureSize: number;
+
+  private gl: WebGL2RenderingContext;
+  private program!: WebGLProgram;
+  private vao!: WebGLVertexArrayObject;
+  private noise!: WebGLTexture;
+  private textures = new Map<Theme, ThemeTexture>();
+  private composites: CompositeTexture[] = [];
+  private activeComposite = -1;
+  private canvasScale = 1;
+  private uniforms = new Map<string, WebGLUniformLocation>();
+  private lost = false;
+
+  static create(canvas: HTMLCanvasElement): InkRenderer | null {
     const gl = canvas.getContext("webgl2", {
-      alpha: true,
+      alpha: false,
       antialias: false,
       depth: false,
       stencil: false,
-      premultipliedAlpha: true,
+      premultipliedAlpha: false,
+      preserveDrawingBuffer: false,
       powerPreference: "high-performance",
     });
-
-    if (!gl) {
-      console.warn("[InkBleed] WebGL2 not supported, will use CSS transition fallback.");
-      return;
-    }
-
-    this.gl = gl;
+    if (!gl) return null;
     try {
-      this.setupShaders(gl);
-      this.noiseTex = createNoiseTexture(gl);
-      this.resize();
-      window.addEventListener("resize", () => this.resize());
-    } catch (e) {
-      console.error("[InkBleed] Shader setup error:", e);
-      this.gl = null;
+      return new InkRenderer(canvas, gl);
+    } catch (err) {
+      console.error("[InkBleed] WebGL2 init error:", err);
+      return null;
     }
   }
 
-  private setupShaders(gl: WebGL2RenderingContext): void {
+  private constructor(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
+    this.canvas = canvas;
+    this.gl = gl;
+    this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) as number;
+    this.init();
+  }
+
+  private init(): void {
+    const gl = this.gl;
     const vs = gl.createShader(gl.VERTEX_SHADER)!;
     gl.shaderSource(vs, FULLSCREEN_VERT);
     gl.compileShader(vs);
@@ -333,12 +455,18 @@ class InkTransitionManager {
     }
 
     this.program = prog;
+    this.uniforms.clear();
     this.vao = gl.createVertexArray()!;
+    this.noise = createNoiseTexture(gl);
+    this.composites = [];
+    this.activeComposite = -1;
+
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
   }
 
-  private getUniform(name: string): WebGLUniformLocation | null {
-    if (!this.gl || !this.program) return null;
+  private uniform(name: string): WebGLUniformLocation | null {
     if (!this.uniforms.has(name)) {
       const loc = this.gl.getUniformLocation(this.program, name);
       if (loc) this.uniforms.set(name, loc);
@@ -346,32 +474,378 @@ class InkTransitionManager {
     return this.uniforms.get(name) ?? null;
   }
 
-  resize(): void {
-    if (!this.canvas || !this.gl) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(window.innerWidth * dpr);
-    const h = Math.round(window.innerHeight * dpr);
-    if (this.canvas.width !== w || this.canvas.height !== h) {
-      this.canvas.width = w;
-      this.canvas.height = h;
+  watchContext(onLost: () => void, onRestored: () => void): void {
+    this.canvas.addEventListener("webglcontextlost", (e) => {
+      e.preventDefault();
+      this.lost = true;
+      this.textures.clear();
+      this.composites = [];
+      this.activeComposite = -1;
+      onLost();
+    });
+    this.canvas.addEventListener("webglcontextrestored", () => {
+      this.lost = false;
+      this.init();
+      onRestored();
+    });
+  }
+
+  get isLost(): boolean {
+    return this.lost;
+  }
+
+  resize(scale: number): void {
+    const rect = this.canvas.getBoundingClientRect();
+    const w = Math.max(1, Math.round(rect.width * scale));
+    const h = Math.max(1, Math.round(rect.height * scale));
+    if (this.canvas.width !== w) this.canvas.width = w;
+    if (this.canvas.height !== h) this.canvas.height = h;
+    this.canvasScale = rect.width > 0 ? w / rect.width : scale;
+  }
+
+  upload(snapshot: Snapshot): void {
+    if (this.lost) return;
+    const gl = this.gl;
+    let entry = this.textures.get(snapshot.theme);
+    if (!entry) {
+      entry = { texture: this.createTexture(), width: 0, height: 0, scale: 0, key: "" };
+      this.textures.set(snapshot.theme, entry);
     }
+    gl.bindTexture(gl.TEXTURE_2D, entry.texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, snapshot.canvas);
+    entry.width = snapshot.canvas.width;
+    entry.height = snapshot.canvas.height;
+    entry.scale = snapshot.scale;
+    entry.key = snapshot.key;
+  }
+
+  hasValid(theme: Theme, key: string): boolean {
+    return !this.lost && this.textures.get(theme)?.key === key;
+  }
+
+  freeze(frame: InkFrame): boolean {
+    if (this.lost) return false;
+    const gl = this.gl;
+    const index = this.activeComposite === 0 ? 1 : 0;
+    const target = this.ensureComposite(index);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, target.framebuffer);
+    const ok = this.render(frame);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    if (!ok) return false;
+    target.scrollX = window.scrollX;
+    target.scrollY = window.scrollY;
+    this.activeComposite = index;
+    return true;
+  }
+
+  draw(frame: InkFrame): void {
+    if (this.lost) return;
+    this.render(frame);
+  }
+
+  private createTexture(): WebGLTexture {
+    const gl = this.gl;
+    const texture = gl.createTexture();
+    if (!texture) throw new Error("createTexture failed");
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return texture;
+  }
+
+  private ensureComposite(index: number): CompositeTexture {
+    const gl = this.gl;
+    const { width, height } = this.canvas;
+    let c = this.composites[index];
+    if (!c) {
+      const framebuffer = gl.createFramebuffer();
+      if (!framebuffer) throw new Error("createFramebuffer failed");
+      c = { texture: this.createTexture(), framebuffer, width: 0, height: 0, scrollX: 0, scrollY: 0 };
+      this.composites[index] = c;
+    }
+    if (c.width !== width || c.height !== height) {
+      gl.bindTexture(gl.TEXTURE_2D, c.texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, c.framebuffer);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, c.texture, 0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      c.width = width;
+      c.height = height;
+    }
+    return c;
+  }
+
+  private sampler(source: InkSource): Sampler | null {
+    if (source === "composite") {
+      const c = this.composites[this.activeComposite];
+      if (!c) return null;
+      return {
+        texture: c.texture,
+        width: c.width,
+        height: c.height,
+        ratio: 1,
+        offsetX: Math.round((window.scrollX - c.scrollX) * this.canvasScale),
+        offsetY: Math.round((window.scrollY - c.scrollY) * this.canvasScale),
+        flipY: true,
+      };
+    }
+    const t = this.textures.get(source);
+    if (!t) return null;
+    return {
+      texture: t.texture,
+      width: t.width,
+      height: t.height,
+      ratio: t.scale / this.canvasScale,
+      offsetX: Math.floor(window.scrollX * t.scale + 0.5),
+      offsetY: Math.floor(window.scrollY * t.scale + 0.5),
+      flipY: false,
+    };
+  }
+
+  private render(frame: InkFrame): boolean {
+    const from = this.sampler(frame.from);
+    const to = this.sampler(frame.to);
+    if (!from || !to) return false;
+
+    const gl = this.gl;
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    gl.useProgram(this.program);
+    gl.bindVertexArray(this.vao);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, from.texture);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, to.texture);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, this.noise);
+
+    gl.uniform1i(this.uniform("uFrom"), 0);
+    gl.uniform1i(this.uniform("uTo"), 1);
+    gl.uniform1i(this.uniform("uNoise"), 2);
+    gl.uniform2f(this.uniform("uFromSize"), from.width, from.height);
+    gl.uniform2f(this.uniform("uToSize"), to.width, to.height);
+    gl.uniform4f(this.uniform("uFromMap"), from.ratio, from.offsetX, from.offsetY, from.flipY ? 1 : 0);
+    gl.uniform4f(this.uniform("uToMap"), to.ratio, to.offsetX, to.offsetY, to.flipY ? 1 : 0);
+    gl.uniform1f(this.uniform("uCanvasScale"), this.canvasScale);
+    gl.uniform2f(this.uniform("uRes"), this.canvas.width, this.canvas.height);
+    gl.uniform2f(this.uniform("uCenter"), frame.center.x, frame.center.y);
+    gl.uniform1f(this.uniform("uRadius"), frame.radius);
+    gl.uniform1f(this.uniform("uCleanup"), frame.cleanup);
+    gl.uniform1f(this.uniform("uTime"), frame.time);
+    gl.uniform1f(this.uniform("uRef"), Math.max(this.canvas.width, this.canvas.height) / this.canvasScale);
+    gl.uniform2f(this.uniform("uSeed"), frame.seed.x, frame.seed.y);
+
+    const cos = Math.cos(frame.seed.angle);
+    const sin = Math.sin(frame.seed.angle);
+    gl.uniformMatrix2fv(this.uniform("uSeedRot"), false, [cos, sin, -sin, cos]);
+
+    gl.uniform1f(this.uniform("uTendril"), 1.0);
+    gl.uniform1f(this.uniform("uNoiseScale"), 1.0);
+    gl.uniform1f(this.uniform("uSoftness"), 1.4);
+    gl.uniform1f(this.uniform("uDrift"), 1.0);
+    gl.uniform3fv(this.uniform("uRimColor"), RIM_COLOR[frame.to]);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    return true;
+  }
+}
+
+function farthestCorner(p: Point): number {
+  if (typeof window === "undefined") return 1000;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  return (
+    Math.max(
+      Math.hypot(p.x, p.y),
+      Math.hypot(w - p.x, p.y),
+      Math.hypot(p.x, h - p.y),
+      Math.hypot(w - p.x, h - p.y)
+    ) + 12
+  );
+}
+
+function randomSeed(): InkFrame["seed"] {
+  return {
+    x: Math.random() * 64 - 32,
+    y: Math.random() * 64 - 32,
+    angle: Math.random() * Math.PI * 2,
+  };
+}
+
+class InkTransitionManager {
+  private renderer: InkRenderer | null = null;
+  private animId: number | null = null;
+  private frame: Omit<InkFrame, "progress" | "radius" | "time" | "cleanup"> | null = null;
+  private captureGen = 0;
+  private capturing = false;
+  private captureQueued = false;
+  private resizeTimer = 0;
+  private duration = 1.25; // seconds
+  private lastClick: { point: Point; seed: InkFrame["seed"]; from: Theme } | null = null;
+
+  init(canvas: HTMLCanvasElement): void {
+    const reducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reducedMotion) {
+      document.documentElement.dataset.ink = "css";
+      return;
+    }
+
+    const renderer = InkRenderer.create(canvas);
+    if (!renderer) {
+      document.documentElement.dataset.ink = "css";
+      return;
+    }
+
+    this.renderer = renderer;
+    document.documentElement.dataset.ink = "webgl";
+    renderer.resize(renderScale());
+
+    renderer.watchContext(
+      () => this.cancel(),
+      () => this.scheduleCapture(0)
+    );
+
+    window.addEventListener("resize", () => {
+      this.renderer?.resize(renderScale());
+      if (this.frame) this.draw(0, 0);
+      this.scheduleCapture(250);
+    });
+
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(() => this.scheduleCapture(250)).observe(document.body);
+    }
+
+    // Capture initial snapshots when fonts and DOM are settled
+    if (typeof document !== "undefined" && document.fonts?.ready) {
+      void document.fonts.ready.then(() => this.scheduleCapture(80));
+    } else {
+      this.scheduleCapture(120);
+    }
+  }
+
+  get isAnimating(): boolean {
+    return this.frame !== null;
   }
 
   toggle(point?: Point): void {
     const currentTheme = getCurrentTheme();
-    const targetTheme: Theme = currentTheme === "dark" ? "light" : "dark";
+    const to: Theme = currentTheme === "dark" ? "light" : "dark";
+    const renderer = this.renderer;
+    const scale = renderScale();
+    const key = layoutKey(scale);
+    const interrupting = this.frame !== null;
 
     const reducedMotion =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Fallback if no WebGL2 or prefers reduced motion
-    if (!this.gl || !this.canvas || reducedMotion) {
-      this.cssFallback(targetTheme);
+    const canAnimate =
+      renderer !== null &&
+      !renderer.isLost &&
+      !reducedMotion &&
+      renderer.hasValid(to, key) &&
+      (interrupting || renderer.hasValid(currentTheme, key));
+
+    if (!canAnimate || !renderer) {
+      this.cancel();
+      this.cssFallback(to);
+      if (renderer && !reducedMotion) this.scheduleCapture(0);
       return;
     }
 
-    this.startInkSpread(targetTheme, point);
+    let from: InkSource = currentTheme;
+    if (interrupting) {
+      if (this.animId) {
+        cancelAnimationFrame(this.animId);
+        this.animId = null;
+      }
+      renderer.resize(scale);
+      const frozen = this.currentFrame(0.5, 0.5);
+      from = frozen && renderer.freeze(frozen) ? "composite" : currentTheme;
+    }
+
+    const center = point ?? {
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+    };
+    const maxDist = farthestCorner(center);
+    const seed = randomSeed();
+
+    this.lastClick = { point: center, seed, from: currentTheme };
+    this.frame = { from, to, center, maxDist, seed };
+
+    renderer.resize(scale);
+    renderer.canvas.style.opacity = "1";
+    renderer.canvas.classList.add("is-active");
+
+    // Immediately render frame 0 so the overlay matches current screen pixel-perfectly
+    this.draw(0, 0);
+
+    // Flip the live DOM underneath in the very same task
+    applyTheme(to);
+
+    let startTime: number | null = null;
+    const tick = (now: number) => {
+      if (!startTime) startTime = now;
+      const elapsed = (now - startTime) / 1000;
+      const linear = Math.min(1, elapsed / this.duration);
+      // power3.out ease
+      const progress = 1 - Math.pow(1 - linear, 3);
+
+      this.draw(progress, elapsed);
+
+      if (linear < 1) {
+        this.animId = requestAnimationFrame(tick);
+      } else {
+        this.finish();
+      }
+    };
+
+    this.animId = requestAnimationFrame(tick);
+  }
+
+  private currentFrame(progress: number, time: number): InkFrame | null {
+    if (!this.frame) return null;
+    const { maxDist } = this.frame;
+    const linear = Math.min(1, time / this.duration);
+    const ramp = Math.max(0, (linear - SPREAD.cleanupFrom) / (1 - SPREAD.cleanupFrom));
+    const cleanup =
+      Math.pow(ramp, SPREAD.cleanupPow) * maxDist * SPREAD.cleanupReach +
+      Math.max(0, (linear - 0.97) / 0.03) * maxDist;
+    const radius = progress * maxDist * SPREAD.growth;
+    return { ...this.frame, progress, time, radius, cleanup };
+  }
+
+  private draw(progress: number, time: number): void {
+    const frame = this.currentFrame(progress, time);
+    if (this.renderer && frame) this.renderer.draw(frame);
+  }
+
+  private finish(): void {
+    const canvas = this.renderer?.canvas;
+    if (!canvas) return;
+    canvas.style.opacity = "0";
+    window.setTimeout(() => this.hide(), 160);
+  }
+
+  private hide(): void {
+    this.frame = null;
+    this.renderer?.canvas.classList.remove("is-active");
+    if (this.captureQueued) this.scheduleCapture(0);
+  }
+
+  private cancel(): void {
+    if (!this.frame) return;
+    if (this.animId) {
+      cancelAnimationFrame(this.animId);
+      this.animId = null;
+    }
+    this.hide();
   }
 
   private cssFallback(targetTheme: Theme): void {
@@ -381,113 +855,56 @@ class InkTransitionManager {
     applyTheme(targetTheme);
     window.setTimeout(() => {
       root.classList.remove("theme-fade");
+      if (this.captureQueued) this.scheduleCapture(0);
     }, 480);
   }
 
-  private startInkSpread(targetTheme: Theme, point?: Point): void {
-    if (this.animId) {
-      cancelAnimationFrame(this.animId);
-      this.animId = null;
+  scheduleCapture(delay: number): void {
+    if (typeof window === "undefined") return;
+    window.clearTimeout(this.resizeTimer);
+    this.resizeTimer = window.setTimeout(() => void this.captureAll(), delay);
+  }
+
+  private async captureAll(): Promise<void> {
+    const renderer = this.renderer;
+    if (!renderer || renderer.isLost) return;
+
+    if (
+      this.capturing ||
+      this.frame ||
+      document.documentElement.classList.contains("theme-fade")
+    ) {
+      this.captureQueued = true;
+      return;
     }
 
-    const canvas = this.canvas!;
-    const gl = this.gl!;
-    this.resize();
+    const scale = renderScale();
+    const key = layoutKey(scale);
+    const current = getCurrentTheme();
+    const other: Theme = current === "dark" ? "light" : "dark";
+    const themes: Theme[] = [current, other].filter((t) => !renderer.hasValid(t, key));
+    this.captureQueued = false;
+    if (themes.length === 0) return;
 
-    const center = point ?? {
-      x: window.innerWidth / 2,
-      y: window.innerHeight / 2,
-    };
-    const maxDist = farthestCorner(center);
-    const seed = {
-      x: Math.random() * 64 - 32,
-      y: Math.random() * 64 - 32,
-      angle: Math.random() * Math.PI * 2,
-    };
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const duration = 1.15; // seconds
-    let startTime: number | null = null;
-    let domFlipped = false;
-
-    canvas.style.opacity = "1";
-    canvas.classList.add("is-active");
-    this.isAnimating = true;
-
-    const targetColor = TARGET_COLORS[targetTheme];
-    const rimColor = RIM_COLORS[targetTheme];
-
-    const tick = (now: number) => {
-      if (!startTime) startTime = now;
-      const elapsed = (now - startTime) / 1000;
-      const linear = Math.min(1, elapsed / duration);
-
-      // Ease-out cubic (same as power3.out in GSAP)
-      const progress = 1 - Math.pow(1 - linear, 3);
-
-      // Flip the live DOM underneath when the ink has swept across the center
-      if (linear >= 0.55 && !domFlipped) {
-        applyTheme(targetTheme);
-        domFlipped = true;
-      }
-
-      // Cleanup term ensures all distant corners are guaranteed covered
-      const ramp = Math.max(0, (linear - SPREAD.cleanupFrom) / (1 - SPREAD.cleanupFrom));
-      const cleanup =
-        Math.pow(ramp, SPREAD.cleanupPow) * maxDist * SPREAD.cleanupReach +
-        Math.max(0, (linear - 0.97) / 0.03) * maxDist;
-      const radius = progress * maxDist * SPREAD.growth;
-
-      // Render WebGL frame
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-
-      gl.useProgram(this.program);
-      gl.bindVertexArray(this.vao);
-
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.noiseTex);
-      gl.uniform1i(this.getUniform("uNoise"), 0);
-
-      gl.uniform3f(this.getUniform("uTargetColor"), targetColor[0], targetColor[1], targetColor[2]);
-      gl.uniform3f(this.getUniform("uRimColor"), rimColor[0], rimColor[1], rimColor[2]);
-      gl.uniform1f(this.getUniform("uCanvasScale"), dpr);
-      gl.uniform2f(this.getUniform("uRes"), canvas.width, canvas.height);
-      gl.uniform2f(this.getUniform("uCenter"), center.x, center.y);
-      gl.uniform1f(this.getUniform("uRadius"), radius);
-      gl.uniform1f(this.getUniform("uCleanup"), cleanup);
-      gl.uniform1f(this.getUniform("uTime"), elapsed);
-      gl.uniform1f(this.getUniform("uRef"), Math.max(window.innerWidth, window.innerHeight));
-      gl.uniform2f(this.getUniform("uSeed"), seed.x, seed.y);
-
-      const cos = Math.cos(seed.angle);
-      const sin = Math.sin(seed.angle);
-      gl.uniformMatrix2fv(this.getUniform("uSeedRot"), false, [cos, sin, -sin, cos]);
-
-      gl.uniform1f(this.getUniform("uTendril"), 1.0);
-      gl.uniform1f(this.getUniform("uNoiseScale"), 1.0);
-      gl.uniform1f(this.getUniform("uSoftness"), 1.4);
-      gl.uniform1f(this.getUniform("uDrift"), 1.0);
-
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-
-      if (linear < 1) {
-        this.animId = requestAnimationFrame(tick);
-      } else {
-        if (!domFlipped) {
-          applyTheme(targetTheme);
+    const gen = ++this.captureGen;
+    this.capturing = true;
+    try {
+      for (const theme of themes) {
+        const snap = await capturePage(theme, scale, renderer.maxTextureSize);
+        if (gen !== this.captureGen) return;
+        if (snap.key !== layoutKey(renderScale())) {
+          this.captureQueued = true;
+          break;
         }
-        // Fade out overlay onto the already-flipped page
-        canvas.style.opacity = "0";
-        setTimeout(() => {
-          canvas.classList.remove("is-active");
-          this.isAnimating = false;
-        }, 160);
+        renderer.upload(snap);
       }
-    };
+    } catch (err) {
+      console.warn("[InkBleed] Background capture note:", err);
+    } finally {
+      this.capturing = false;
+    }
 
-    this.animId = requestAnimationFrame(tick);
+    if (this.captureQueued) this.scheduleCapture(250);
   }
 }
 
