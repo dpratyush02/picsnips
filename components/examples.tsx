@@ -119,14 +119,14 @@ export function Examples() {
             <ChevronRight className="size-5" />
           </button>
 
-          <div className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-card/60 p-4 sm:p-6 shadow-2xl backdrop-blur-md">
+          <div className="overflow-hidden rounded-[1.8rem] border border-border dark:border-white/10 bg-card p-4 sm:p-6 shadow-xl dark:shadow-2xl backdrop-blur-md">
             {/* Twitter / X Post Header */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 pb-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border dark:border-white/10 pb-4">
               <div className="flex items-center gap-3">
                 <img
                   src={scene.authorAvatar}
                   alt={scene.authorName}
-                  className="size-11 rounded-full border border-white/10 object-cover bg-white/5"
+                  className="size-11 rounded-full border border-border dark:border-white/10 object-cover bg-muted dark:bg-white/5"
                 />
                 <div>
                   <div className="flex items-center gap-1.5 font-semibold text-foreground text-sm">
@@ -171,10 +171,10 @@ export function Examples() {
             </div>
 
             {/* Footer stats bar with mobile Prev / Next buttons */}
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground pt-3 border-t border-white/5">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground pt-3 border-t border-border dark:border-white/5">
               <div className="flex items-center gap-2">
                 <span className="font-mono">20 vertical frames on X</span>
-                <span className="text-white/20">•</span>
+                <span className="text-muted-foreground/30">•</span>
                 <span className="flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-emerald-400" />
                   Made with PicSnips
@@ -237,7 +237,7 @@ function Compare({ scene }: { scene: Scene }) {
   }, [reduce, scene]);
 
   return (
-    <div className="relative overflow-hidden rounded-[1.4rem] border border-white/10 bg-black shadow-[0_30px_80px_-48px_rgba(0,0,0,0.9)]">
+    <div className="relative overflow-hidden rounded-[1.4rem] border border-border dark:border-white/10 bg-black shadow-[0_30px_80px_-48px_rgba(0,0,0,0.9)]">
       <div className="relative aspect-[2.2/1] min-h-56 sm:min-h-72">
         {/* Sliced 20 pieces */}
         <Sliced slices={scene.slices} />

@@ -621,10 +621,10 @@ function SplitterTool() {
             "flex min-h-[360px] cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed px-6 text-center transition outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
             dragging
               ? "border-foreground bg-foreground/5"
-              : "border-white/15 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]",
+              : "border-border dark:border-white/15 bg-muted/20 dark:bg-white/[0.02] hover:border-foreground/30 hover:bg-muted/40 dark:hover:border-white/30 dark:hover:bg-white/[0.04]",
           )}
         >
-          <span className="flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+          <span className="flex size-14 items-center justify-center rounded-2xl border border-border dark:border-white/10 bg-muted/60 dark:bg-white/5">
             <Upload className="size-6" />
           </span>
           <p className="mt-5 text-lg font-medium">
@@ -637,16 +637,16 @@ function SplitterTool() {
             Browse files
           </span>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1 font-medium text-emerald-400">
+            <span className="inline-flex items-center gap-1 font-medium text-emerald-500 dark:text-emerald-400">
               <Check className="size-3.5" />
               Free to use
             </span>
-            <span className="text-white/20">•</span>
-            <span className="inline-flex items-center gap-1 font-medium text-emerald-400">
+            <span className="text-muted-foreground/30">•</span>
+            <span className="inline-flex items-center gap-1 font-medium text-emerald-500 dark:text-emerald-400">
               <Check className="size-3.5" />
               No signup required
             </span>
-            <span className="text-white/20">•</span>
+            <span className="text-muted-foreground/30">•</span>
             <span>100% In-Browser</span>
           </div>
         </div>
@@ -663,7 +663,7 @@ function SplitterTool() {
           <Button
             asChild
             variant="ghost"
-            className="rounded-full px-4 text-muted-foreground hover:text-foreground border border-white/5 bg-white/[0.03]"
+            className="rounded-full px-4 text-muted-foreground hover:text-foreground border border-border dark:border-white/5 bg-muted/40 dark:bg-white/[0.03]"
           >
             <Link href="/library">Browse Stock Library (15+)</Link>
           </Button>

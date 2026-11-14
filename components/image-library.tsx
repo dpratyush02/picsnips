@@ -95,7 +95,7 @@ export function ImageLibrary() {
         {filteredImages.map((item) => (
           <div
             key={item.id}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/40 transition hover:border-white/20 hover:shadow-[0_20px_50px_-25px_rgba(0,0,0,0.8)]"
+            className="group relative flex flex-col overflow-hidden rounded-2xl border border-border dark:border-white/10 bg-card transition hover:border-foreground/25 hover:shadow-lg dark:hover:shadow-[0_20px_50px_-25px_rgba(0,0,0,0.8)]"
           >
             {/* Image Thumbnail */}
             <div className="relative aspect-[16/9] w-full overflow-hidden bg-black/60">
@@ -183,7 +183,7 @@ export function ImageLibrary() {
       )}
 
       {/* Footer info note */}
-      <div className="mt-12 rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-muted-foreground bg-white/[0.01]">
+      <div className="mt-12 rounded-2xl border border-dashed border-border dark:border-white/10 p-6 text-center text-sm text-muted-foreground bg-muted/20 dark:bg-white/[0.01]">
         <p>
           Want to split your own image instead?{" "}
           <Link

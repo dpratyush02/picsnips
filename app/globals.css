@@ -49,23 +49,23 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.985 0.002 90);
+  --foreground: oklch(0.145 0.005 285);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.145 0.005 285);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.145 0.005 285);
+  --primary: oklch(0.205 0.005 285);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(0.94 0.004 285);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --muted: oklch(0.94 0.004 285);
+  --muted-foreground: oklch(0.48 0.01 285);
+  --accent: oklch(0.94 0.004 285);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --border: oklch(0.88 0.006 285);
+  --input: oklch(0.88 0.006 285);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
@@ -79,7 +79,7 @@
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-border: oklch(0.88 0.006 285);
   --sidebar-ring: oklch(0.708 0 0);
 }
 
@@ -123,18 +123,58 @@
   }
   html {
     @apply scroll-smooth font-sans;
+  }
+  html.dark {
     color-scheme: dark;
+  }
+  html:not(.dark) {
+    color-scheme: light;
   }
   body {
     @apply bg-background text-foreground;
     background-image:
+      radial-gradient(ellipse 80% 50% at 50% -12%, oklch(0.92 0.03 40 / 0.45), transparent 60%),
+      radial-gradient(ellipse 42% 32% at 100% 0%, oklch(0.93 0.03 285 / 0.35), transparent 50%);
+    background-attachment: fixed;
+  }
+  .dark body {
+    background-image:
       radial-gradient(ellipse 80% 50% at 50% -12%, oklch(0.38 0.07 285 / 0.28), transparent 55%),
       radial-gradient(ellipse 42% 32% at 100% 0%, oklch(0.5 0.08 40 / 0.1), transparent 50%);
-    background-attachment: fixed;
   }
   ::selection {
     background: oklch(0.85 0.02 285 / 0.28);
   }
+}
+
+/* Ink Bleed Canvas & Transitions (Codemure) */
+.ink-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+
+.ink-canvas.is-active {
+  visibility: visible;
+}
+
+html.theme-fade,
+html.theme-fade *,
+html.theme-fade *::before,
+html.theme-fade *::after {
+  transition:
+    background-color var(--theme-fade, 0.45s) ease,
+    border-color var(--theme-fade, 0.45s) ease,
+    color var(--theme-fade, 0.45s) ease,
+    fill var(--theme-fade, 0.45s) ease,
+    stroke var(--theme-fade, 0.45s) ease,
+    box-shadow var(--theme-fade, 0.45s) ease !important;
 }
 
 @keyframes picsnips-gap {

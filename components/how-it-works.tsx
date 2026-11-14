@@ -34,10 +34,10 @@ export function HowItWorks() {
             return (
               <li
                 key={step.title}
-                className="rounded-3xl border border-border bg-card/60 p-6 shadow-[0_20px_50px_-40px_rgba(0,0,0,0.8)]"
+                className="rounded-3xl border border-border bg-card p-6 shadow-[0_20px_50px_-40px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_-40px_rgba(0,0,0,0.8)]"
               >
                 <div className="flex items-center justify-between">
-                  <span className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                  <span className="flex size-11 items-center justify-center rounded-2xl border border-border dark:border-white/10 bg-muted/60 dark:bg-white/5">
                     <Icon className="size-5" />
                   </span>
                   <span className="font-mono text-sm text-muted-foreground">

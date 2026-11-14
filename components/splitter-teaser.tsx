@@ -13,9 +13,9 @@ export function SplitterTeaser() {
           body="Cuts happen in your browser with zero server uploads. The pieces stay in the exact numerical order X expects."
         />
 
-        <div className="mt-12 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-card/40 p-8 sm:p-12 shadow-[0_30px_90px_-40px_rgba(0,0,0,0.8)] backdrop-blur-sm">
+        <div className="mt-12 overflow-hidden rounded-3xl border border-border dark:border-white/10 bg-card p-8 sm:p-12 shadow-[0_30px_90px_-40px_rgba(0,0,0,0.1)] dark:shadow-[0_30px_90px_-40px_rgba(0,0,0,0.8)] backdrop-blur-sm">
           <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-            <div className="flex size-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 shadow-inner">
+            <div className="flex size-16 items-center justify-center rounded-2xl border border-border dark:border-white/10 bg-muted/60 dark:bg-white/5 shadow-inner">
               <Layers className="size-8 text-primary" />
             </div>
 
@@ -33,13 +33,13 @@ export function SplitterTeaser() {
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="h-12 rounded-full px-6 text-[15px] border-white/10 hover:bg-white/5">
+              <Button asChild variant="outline" size="lg" className="h-12 rounded-full px-6 text-[15px] border-border dark:border-white/10 hover:bg-muted/60">
                 <Link href="/library">Browse 4K Presets</Link>
               </Button>
             </div>
 
-            <div className="mt-12 grid w-full grid-cols-1 gap-4 border-t border-white/5 pt-8 sm:grid-cols-3 text-left">
-              <div className="flex items-start gap-3 rounded-2xl bg-white/[0.02] border border-white/5 p-4">
+            <div className="mt-12 grid w-full grid-cols-1 gap-4 border-t border-border dark:border-white/5 pt-8 sm:grid-cols-3 text-left">
+              <div className="flex items-start gap-3 rounded-2xl bg-muted/30 dark:bg-white/[0.02] border border-border dark:border-white/5 p-4">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Lock className="size-4" />
                 </span>
@@ -51,7 +51,7 @@ export function SplitterTeaser() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 rounded-2xl bg-white/[0.02] border border-white/5 p-4">
+              <div className="flex items-start gap-3 rounded-2xl bg-muted/30 dark:bg-white/[0.02] border border-border dark:border-white/5 p-4">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Zap className="size-4" />
                 </span>
@@ -63,7 +63,7 @@ export function SplitterTeaser() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 rounded-2xl bg-white/[0.02] border border-white/5 p-4">
+              <div className="flex items-start gap-3 rounded-2xl bg-muted/30 dark:bg-white/[0.02] border border-border dark:border-white/5 p-4">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Sparkles className="size-4" />
                 </span>

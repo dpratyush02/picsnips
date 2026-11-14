@@ -16,7 +16,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: "easeOut" }}
         >
-          <p className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-muted-foreground">
+          <p className="inline-flex items-center rounded-full border border-border bg-muted/60 dark:border-white/10 dark:bg-white/5 px-3 py-1 text-xs font-medium text-muted-foreground">
             Built for X&apos;s new 20-image feature
           </p>
           <h1 className="mt-6 max-w-xl text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-6xl sm:leading-[1.05]">
@@ -45,7 +45,7 @@ export function Hero() {
           className="relative"
         >
           <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,rgba(251,146,60,0.16),transparent_65%)]" />
-          <div className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-black shadow-[0_40px_120px_-48px_rgba(0,0,0,0.9)]">
+          <div className="overflow-hidden rounded-[1.6rem] border border-border dark:border-white/10 bg-card shadow-[0_40px_120px_-48px_rgba(0,0,0,0.4)] dark:shadow-[0_40px_120px_-48px_rgba(0,0,0,0.9)]">
             <div className="hero-strips flex h-64 w-full sm:h-80 gap-0.5 bg-black">
               {scenes[0].slices.map((sliceUrl, index) => (
                 <div
@@ -57,7 +57,7 @@ export function Hero() {
                 />
               ))}
             </div>
-            <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-xs text-muted-foreground">
+            <div className="flex items-center justify-between border-t border-border dark:border-white/10 px-4 py-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5 font-medium text-foreground">
                 <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
                 Real X Post: Spider-Man 20-Piece Split
@@ -66,7 +66,7 @@ export function Hero() {
                 href={scenes[0].tweetUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="font-mono text-xs hover:text-white transition"
+                className="font-mono text-xs hover:text-foreground transition"
               >
                 01 → 20 • View on X ↗
               </a>

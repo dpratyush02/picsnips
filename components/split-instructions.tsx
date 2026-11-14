@@ -44,10 +44,10 @@ export function SplitInstructions() {
             return (
               <div
                 key={item.step}
-                className="relative flex flex-col rounded-3xl border border-white/10 bg-card/60 p-6 shadow-sm backdrop-blur-sm"
+                className="relative flex flex-col rounded-3xl border border-border dark:border-white/10 bg-card p-6 shadow-sm backdrop-blur-sm"
               >
                 <div className="flex items-center justify-between">
-                  <span className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-primary">
+                  <span className="flex size-11 items-center justify-center rounded-2xl border border-border dark:border-white/10 bg-muted/60 dark:bg-white/5 text-primary">
                     <Icon className="size-5" />
                   </span>
                   <span className="font-mono text-xs font-semibold text-muted-foreground">
@@ -68,3 +68,4 @@ export function SplitInstructions() {
     </section>
   );
 }
+

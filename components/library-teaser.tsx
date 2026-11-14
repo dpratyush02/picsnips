@@ -13,7 +13,7 @@ export function LibraryTeaser() {
   ];
 
   return (
-    <section className="scroll-mt-24 px-6 py-20 sm:py-24 border-y border-white/5 bg-white/[0.01]">
+    <section className="scroll-mt-24 px-6 py-20 sm:py-24 border-y border-border dark:border-white/5 bg-muted/20 dark:bg-white/[0.01]">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <SectionHeading
@@ -37,7 +37,7 @@ export function LibraryTeaser() {
             <Link
               key={item.id}
               href={`/library`}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-card/40 transition hover:border-white/20 hover:scale-[1.02] shadow-lg"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-border dark:border-white/10 bg-card transition hover:border-foreground/25 hover:scale-[1.02] shadow-sm"
             >
               <div className="relative aspect-[16/10] w-full overflow-hidden bg-black/60">
                 <img

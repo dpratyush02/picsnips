@@ -44,14 +44,14 @@ export function DemoVideo() {
           body="Watch the step-by-step screen recording: upload, choose 20 slices, download the ordered ZIP, and post to X in seconds."
         />
 
-        <div className="mt-12 overflow-hidden rounded-[1.8rem] border border-white/10 bg-gradient-to-b from-white/[0.07] to-transparent p-2 sm:p-4 shadow-2xl backdrop-blur-xl">
+        <div className="mt-12 overflow-hidden rounded-[1.8rem] border border-border dark:border-white/10 bg-card/60 dark:bg-gradient-to-b dark:from-white/[0.07] dark:to-transparent p-2 sm:p-4 shadow-xl dark:shadow-2xl backdrop-blur-xl">
           {/* macOS window header */}
           <div className="flex items-center justify-between px-3 py-2.5 sm:px-4">
             <div className="flex items-center gap-2">
               <span className="size-3 rounded-full bg-rose-500/80" />
               <span className="size-3 rounded-full bg-amber-500/80" />
               <span className="size-3 rounded-full bg-emerald-500/80" />
-              <span className="ml-2 hidden text-xs font-medium text-white/50 sm:inline">
+              <span className="ml-2 hidden text-xs font-medium text-muted-foreground sm:inline">
                 PicSnips — Screen Recording Demo
               </span>
             </div>
@@ -119,7 +119,7 @@ export function DemoVideo() {
 
           {/* Steps highlight strip */}
           <div className="mt-4 grid gap-3 px-2 py-2 sm:grid-cols-3 text-xs sm:text-sm">
-            <div className="flex items-center gap-2 rounded-xl bg-white/[0.03] border border-white/5 p-3">
+            <div className="flex items-center gap-2 rounded-xl bg-muted/40 dark:bg-white/[0.03] border border-border dark:border-white/5 p-3">
               <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs">
                 1
               </span>
@@ -127,7 +127,7 @@ export function DemoVideo() {
                 <strong className="text-foreground">Drop Image:</strong> Select any wide picture or wallpaper
               </span>
             </div>
-            <div className="flex items-center gap-2 rounded-xl bg-white/[0.03] border border-white/5 p-3">
+            <div className="flex items-center gap-2 rounded-xl bg-muted/40 dark:bg-white/[0.03] border border-border dark:border-white/5 p-3">
               <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs">
                 2
               </span>
@@ -135,7 +135,7 @@ export function DemoVideo() {
                 <strong className="text-foreground">Set 20 Slices:</strong> Instant preview in your browser
               </span>
             </div>
-            <div className="flex items-center gap-2 rounded-xl bg-white/[0.03] border border-white/5 p-3">
+            <div className="flex items-center gap-2 rounded-xl bg-muted/40 dark:bg-white/[0.03] border border-border dark:border-white/5 p-3">
               <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs">
                 3
               </span>
