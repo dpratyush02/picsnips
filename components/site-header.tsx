@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 const links = [
   { href: "/split", label: "Splitter" },
+  { href: "/tools", label: "Tools" },
   { href: "/library", label: "Library" },
   { href: "/#demo", label: "Demo" },
   { href: "/#examples", label: "Real Posts" },
@@ -25,7 +26,7 @@ export function SiteHeader() {
         <Link href="/" className="rounded-lg text-foreground focus-visible:ring-3 focus-visible:ring-ring/50" aria-label="PicSnips home">
           <Logo />
         </Link>
-        <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-4 text-sm text-muted-foreground md:flex" aria-label="Primary">
           {links.map((link) => (
             <Link key={link.label} href={link.href} className="transition hover:text-foreground">
               {link.label}

@@ -7,7 +7,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test lib/geometry.test.ts lib/voice/dsp.test.ts lib/voice/adaptive.test.ts",
+    "test": "node --experimental-strip-types --test lib/geometry.test.ts lib/scroll/scroll.test.ts lib/voice/dsp.test.ts lib/voice/adaptive.test.ts",
     "prepare:voice": "node scripts/prepare-voice-assets.mjs",
     "build:production": "npm run prepare:voice -- --ffmpeg && npm run build"
   },
@@ -33,12 +33,14 @@
     "tw-animate-css": "^1.4.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "postcss": "^8.5.33",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
   }
