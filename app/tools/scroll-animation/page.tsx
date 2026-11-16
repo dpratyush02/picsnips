@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { SiteFrame } from "@/components/site-frame";
 import { ScrollLoader } from "@/components/scroll/scroll-loader";
 import { ToolErrorBoundary } from "@/components/tool-error-boundary";
@@ -23,20 +22,7 @@ export const metadata: Metadata = {
   },
 };
 
-export function generateStaticParams() {
-  return [{ tool: "scroll-animation" }];
-}
-
-export default async function ScrollPage({
-  params,
-}: {
-  params: Promise<{ tool: string }>;
-}) {
-  const { tool } = await params;
-  if (tool !== "scroll-animation") {
-    notFound();
-  }
-
+export default function ScrollPage() {
   return (
     <SiteFrame>
       <main className="mx-auto max-w-6xl px-6 py-10 sm:py-16">

@@ -45,6 +45,6 @@ lv_0_*.mp4
 /image-library/
 scratch_*.json
 
-# Generated browser audio runtimes
+# Generated local voice model and optional media runtime
 /public/voice-assets/
 /public/voice-assets.next/

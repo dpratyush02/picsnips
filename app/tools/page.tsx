@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Layers, Film, ArrowUpRight } from "lucide-react";
+import { Layers, Film, AudioLines, ArrowUpRight } from "lucide-react";
 import { SiteFrame } from "@/components/site-frame";
 import { SectionHeading } from "@/components/section-heading";
+import { hasVoiceRuntime } from "@/lib/voice/availability";
 import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -31,18 +32,27 @@ const tools = [
   },
 ];
 
+const voice = {
+  href: "/tools/voice-enhancer",
+  title: "PicSnips Auto Enhance",
+  body: "Reduce background noise in audio and video with AI that runs on your device.",
+  icon: AudioLines,
+  new: true,
+};
+
 export default function ToolsPage() {
+  const ready = hasVoiceRuntime();
   return (
     <SiteFrame>
       <main className="mx-auto max-w-6xl px-6 py-16">
         <SectionHeading
           as="h1"
           eyebrow="PicSnips tools"
-          title="Make every frame worth sharing."
-          body="Create ordered image posts, right in your browser."
+          title={ready ? "Create more with PicSnips." : "Make every frame worth sharing."}
+          body={ready ? "Split images, extract frames and clean up recordings in your browser." : "Create ordered image posts, right in your browser."}
         />
         <div className="mt-12 grid gap-5 md:grid-cols-2">
-          {tools.map((tool) => (
+          {(ready ? [...tools, voice] : tools).map((tool) => (
             <Link
               key={tool.href}
               href={tool.href}

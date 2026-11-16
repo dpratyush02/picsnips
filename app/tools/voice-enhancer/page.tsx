@@ -26,7 +26,7 @@ export default function VoiceEnhancerPage() {
   return (
     <SiteFrame>
       <main className="mx-auto max-w-6xl px-6 py-10 sm:py-16">
-        <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">← Back to PicSnips</Link>
+        <Link href="/tools" className="text-sm text-muted-foreground hover:text-foreground">← All tools</Link>
         <p className="mt-6 text-sm font-medium text-primary">PicSnips Auto Enhance <span className="ml-2 rounded-full bg-primary/10 px-2 py-1 text-[10px]">NEW</span></p>
         <h1 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-5xl">Make Every Voice Sound Clear.</h1>
         <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">Upload a recording and let PicSnips adjust it automatically. Listen to the difference before you download.</p>
@@ -35,7 +35,7 @@ export default function VoiceEnhancerPage() {
           <h2 id="voice-faq" className="mb-6 text-2xl font-semibold">Frequently asked questions</h2>
           {faqs.map(([question, answer]) => <details key={question} className="rounded-xl border border-border bg-card p-4"><summary className="cursor-pointer font-medium">{question}</summary><p className="mt-3 text-sm leading-6 text-muted-foreground">{answer}</p></details>)}
         </section>
-        <p className="mt-8 text-xs text-muted-foreground">Powered by <a className="underline" href="https://github.com/Rikorose/DeepFilterNet">DeepFilterNet3</a> · <a className="underline" href="/voice-licenses/DeepFilterNet-MIT.txt">MIT license</a> · <a className="underline" href="/voice-licenses/FFmpeg-WASM.txt">FFmpeg.wasm source and licenses</a></p>
+        <p className="mt-8 text-xs text-muted-foreground">Powered by <a className="underline" href="https://github.com/Rikorose/DeepFilterNet">DeepFilterNet3</a> · <a className="underline" href="/voice-licenses/DeepFilterNet-MIT.txt">MIT license</a></p>
       </main>
     </SiteFrame>
   );

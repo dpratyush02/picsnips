@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Runtime assets copied from upstream npm packages by prepare:voice.
     "public/voice-assets/**",
     "public/voice-assets.next/**",
   ]),
