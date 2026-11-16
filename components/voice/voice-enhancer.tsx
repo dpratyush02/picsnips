@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { AudioLines, Check, Download, LockKeyhole, Upload } from 'lucide-react';
+import { AudioLines, Check, Download, LockKeyhole, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { downloadBlob } from '@/lib/download';
 import { formatBytes } from '@/lib/files';
@@ -38,6 +38,7 @@ export default function VoiceEnhancer() {
   const [bitrate, setBitrate] = useState(192);
   const [videoError, setVideoError] = useState(false);
   const picker = useRef<HTMLInputElement>(null);
+  const uploadButton = useRef<HTMLButtonElement>(null);
   const player = useRef<HTMLAudioElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const job = useRef<AbortController | null>(null);
@@ -67,6 +68,19 @@ export default function VoiceEnhancer() {
     setPosition(0);
     if (player.current?.readyState) player.current.currentTime = 0;
   }
+  function clearRecording() {
+    const activeJob = job.current;
+    job.current = null;
+    activeJob?.abort();
+    video.current?.pause();
+    clearOutput();
+    release(source?.originalUrl);
+    release(source?.videoUrl);
+    setSource(null);
+    setStatus(null);
+    setError('');
+    setVideoError(false);
+  }
   async function run(label: string, task: (signal: AbortSignal) => Promise<void>) {
     job.current?.abort();
     const controller = new AbortController();
@@ -85,11 +99,7 @@ export default function VoiceEnhancer() {
   }
   function upload(file?: File) {
     if (!file) return;
-    clearOutput();
-    release(source?.originalUrl);
-    release(source?.videoUrl);
-    setSource(null);
-    setVideoError(false);
+    clearRecording();
     void run('Opening your recording…', async signal => {
       const [{validateFile, isVideo, decodeAudio, extractAudio, cancelled}, {waveform, wavBytes}, {checkRuntime}] = await Promise.all([
         import('@/lib/voice/media'), import('@/lib/voice/dsp'), import('@/lib/voice/runtime'),
@@ -165,7 +175,7 @@ export default function VoiceEnhancer() {
   return (
     <div className="mt-8 space-y-6">
       <input ref={picker} type="file" accept={accept} tabIndex={-1} className="sr-only" aria-label="Select audio or video file" onChange={e => { upload(e.target.files?.[0]); e.target.value = ''; }} />
-      <button type="button" className={`flex w-full flex-col items-center rounded-3xl border-2 border-dashed p-8 text-center transition sm:p-12 ${dragging ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-primary/50'}`} onClick={() => picker.current?.click()} onDragOver={e => {e.preventDefault(); setDragging(true);}} onDragLeave={() => setDragging(false)} onDrop={e => {e.preventDefault(); setDragging(false); upload(e.dataTransfer.files[0]);}}>
+      <button ref={uploadButton} type="button" className={`flex w-full flex-col items-center rounded-2xl border border-dashed p-8 text-center transition sm:p-12 ${dragging ? 'border-primary bg-primary/10' : 'border-input bg-card hover:border-primary/50'}`} onClick={() => picker.current?.click()} onDragOver={e => {e.preventDefault(); setDragging(true);}} onDragLeave={() => setDragging(false)} onDrop={e => {e.preventDefault(); setDragging(false); upload(e.dataTransfer.files[0]);}}>
         <Upload aria-hidden className="mb-4 size-7 text-primary" />
         <span className="font-semibold">{source ? 'Replace recording' : 'Drop an audio or video file here'}</span>
         <span className="mt-2 text-sm text-muted-foreground">Browse files · MP3, WAV, M4A, OGG, MP4, MOV or WebM</span>
@@ -177,8 +187,19 @@ export default function VoiceEnhancer() {
         <Button variant="outline" onClick={() => job.current?.abort()}>Cancel</Button>
       </div>}
       {source && <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
-        <section className="min-w-0 space-y-5 rounded-3xl border border-border bg-card p-5 sm:p-7">
-          <div><h2 className="break-all font-semibold">{source.file.name}</h2><p className="mt-1 text-sm text-muted-foreground">{formatBytes(source.file.size)} · {clock(duration)} · 48 kHz mono output</p></div>
+        <section className="min-w-0 space-y-5 rounded-2xl border border-border bg-card p-5 sm:p-7">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1 basis-40">
+              <h2 className="break-all font-semibold">{source.file.name}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{formatBytes(source.file.size)} · {clock(duration)} · 48 kHz mono output</p>
+            </div>
+            <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => {
+              clearRecording();
+              uploadButton.current?.focus();
+            }}>
+              <Trash2 aria-hidden className="size-4" /> Remove file
+            </Button>
+          </div>
           {source.videoUrl && !videoError && <video ref={video} src={source.videoUrl} controls playsInline preload="metadata" className="max-h-64 w-full rounded-xl bg-black" onPlay={() => player.current?.pause()} onError={() => setVideoError(true)} />}
           {videoError && <p className="text-sm text-muted-foreground">Your browser cannot preview this video codec. Use the audio player below.</p>}
           {output && <div className="flex flex-wrap gap-2" aria-label="Compare audio">
@@ -204,7 +225,7 @@ export default function VoiceEnhancer() {
             <label className="flex items-center gap-2"><input type="checkbox" checked={loop} onChange={e => setLoop(e.target.checked)} /> Loop</label>
           </div>
         </section>
-        <section className="self-start space-y-5 rounded-3xl border border-border bg-card p-5 sm:p-7">
+        <section className="self-start space-y-5 rounded-2xl border border-border bg-card p-5 sm:p-7">
           {!output ? <>
             <h2 className="font-semibold">PicSnips Auto Enhance</h2>
             <p className="text-sm text-muted-foreground">PicSnips checks for background noise and tests which cleanup works best for your recording.</p>

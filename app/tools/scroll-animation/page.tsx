@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { SiteFrame } from "@/components/site-frame";
+import { ToolPageIntro } from "@/components/tool-page-intro";
 import { ScrollLoader } from "@/components/scroll/scroll-loader";
 import { ToolErrorBoundary } from "@/components/tool-error-boundary";
 import { siteUrl } from "@/lib/site";
@@ -24,21 +24,13 @@ export const metadata: Metadata = {
 
 export default function ScrollPage() {
   return (
-    <SiteFrame>
-      <main className="mx-auto max-w-6xl px-6 py-10 sm:py-16">
-        <Link href="/tools" className="text-sm text-muted-foreground hover:text-foreground">
-          ← All tools
-        </Link>
-        <p className="mt-6 text-sm font-medium text-primary">
-          Scroll Animation Maker{" "}
-          <span className="ml-2 rounded-full bg-primary/10 px-2 py-1 text-[10px]">NEW</span>
-        </p>
-        <h1 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight sm:text-5xl">
-          Turn Videos Into Swipeable Animations.
-        </h1>
-        <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">
-          Transform a video or GIF into a frame-by-frame experience for X. Upload, extract, and share.
-        </p>
+    <SiteFrame showFaqLink={false}>
+      <main className="site-width min-h-[75vh] pb-16 pt-10 sm:pb-24 sm:pt-16">
+        <ToolPageIntro
+          label="Scroll Animation Maker"
+          title="Turn videos into swipeable animations."
+          body="Transform a video, GIF, or image sequence into a frame-by-frame experience for X."
+        />
         <ToolErrorBoundary>
           <ScrollLoader />
         </ToolErrorBoundary>

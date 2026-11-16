@@ -6,63 +6,66 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const questions = [
-  {
-    id: "feature",
-    question: "What is the 20-image X feature?",
-    answer:
-      "X lets a single post include up to 20 images. Creators slice one wide picture into vertical strips and upload those strips in order so the post reads as one continuous panorama.",
-  },
-  {
-    id: "quality",
-    question: "Does PicSnips reduce image quality?",
-    answer:
-      "PNG export is lossless after your browser decodes the image. Pieces keep the original pixel size, nothing is upscaled, and remainder pixels are distributed so every column and row is kept. JPEG is optional and starts at quality 95, with transparency flattened onto white. EXIF metadata is not copied, because the browser works from decoded pixels.",
-  },
-  {
-    id: "free",
-    question: "Is PicSnips free?",
-    answer:
-      "Yes. There is no account, watermark, or paywall. The only limit is what your browser can hold in memory.",
-  },
-  {
-    id: "upload",
-    question: "Are my images uploaded to a server?",
-    answer:
-      "No. Splitting, preview, and the ZIP are all created locally in your browser. The image file is never sent to PicSnips. Opening X only sends the caption you typed to X's composer.",
-  },
-  {
-    id: "count",
-    question: "Can I change the number of splits?",
-    answer:
-      "Yes. Choose any count from 2 to 20. Vertical strips are the default for panoramic posts. You can also split horizontally, or into a grid whose rows and columns multiply to 20 or fewer.",
-  },
-  {
-    id: "post",
-    question: "Can I post directly to X?",
-    answer:
-      "Post to X opens the composer with your caption filled in. X does not let a website attach images through that link, so you add the downloaded files yourself, in order from 01. This version does not sign in to X or publish on your behalf.",
-  },
-];
+export function Faq({ voiceReady }: { voiceReady: boolean }) {
+  const questions = [
+    {
+      id: "toolkit",
+      question: "What is PicSnips?",
+      answer: "PicSnips is a growing collection of browser-based creator tools for preparing images, video frames, and other media to share.",
+    },
+    {
+      id: "tools",
+      question: "What tools are currently available?",
+      answer: voiceReady
+        ? "Image Splitter, Scroll Animation Maker, Auto Enhance for audio and video, and a curated Image Library."
+        : "Image Splitter, Scroll Animation Maker, and a curated Image Library.",
+    },
+    {
+      id: "free",
+      question: "Is PicSnips free? Do I need an account?",
+      answer: "Yes, it’s free. Open any available tool without signing up. Exports have no watermark.",
+    },
+    {
+      id: "upload",
+      question: "Are my files uploaded to a server?",
+      answer: "Image splitting, frame extraction, and audio enhancement happen in your browser. PicSnips doesn’t receive your files.",
+    },
+    {
+      id: "mobile",
+      question: "Can I use PicSnips on mobile?",
+      answer: "Yes, on current mobile browsers. Large files can run into device memory limits, and audio or video support depends on the file’s codec.",
+    },
+    {
+      id: "quality",
+      question: "Does the image splitter reduce image quality?",
+      answer: "PNG preserves the original decoded pixels and dimensions. JPEG is optional and uses lossy compression. The browser works with decoded pixels, so exports don’t copy EXIF metadata.",
+    },
+    {
+      id: "count",
+      question: "Can I change the number of image slices?",
+      answer: "Yes. Choose 2 to 20 vertical or horizontal slices, or set your own rows and columns for a grid of up to 20 tiles.",
+    },
+    {
+      id: "feature",
+      question: "How do 20-image posts on X work?",
+      answer: "A post can include up to 20 images. Attach your tiles in order to share a panorama as a sequence. Check how X displays the post before sharing it widely.",
+    },
+    {
+      id: "post",
+      question: "How do I share something I created?",
+      answer: "Download your files and share them wherever you like. In the splitter, Post to X opens the composer with your caption. Attach the images manually in order, starting with 01.",
+    },
+  ];
 
-export function Faq() {
   return (
-    <section id="faq" className="scroll-mt-24 px-6 py-20 sm:py-28">
-      <div className="mx-auto max-w-3xl">
-        <SectionHeading
-          eyebrow="FAQ"
-          title="Before you post it."
-          body="The short version: it is free, private, and it will not post the images for you."
-        />
-        <Accordion type="single" collapsible className="mt-10">
-          {questions.map((item) => (
-            <AccordionItem key={item.id} value={item.id} className="border-border">
-              <AccordionTrigger className="py-4 text-base hover:no-underline">
-                {item.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-6">
-                {item.answer}
-              </AccordionContent>
+    <section id="faq" className="editorial-section site-width">
+      <div className="grid gap-7 border-t border-line pt-9 lg:grid-cols-[0.82fr_1.18fr] lg:gap-12">
+        <SectionHeading title="Frequently asked questions." />
+        <Accordion type="single" collapsible className="overflow-hidden rounded-2xl border border-border bg-card px-4 sm:px-6">
+          {questions.map(({ id, question, answer }) => (
+            <AccordionItem key={id} value={id} className="border-border">
+              <AccordionTrigger className="py-4 text-left text-base font-normal hover:no-underline">{question}</AccordionTrigger>
+              <AccordionContent className="text-sm leading-6 text-muted-foreground">{answer}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>

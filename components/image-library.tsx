@@ -1,200 +1,112 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Scissors, Search } from "lucide-react";
-import { cn } from "cn";
 import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
-import { libraryCategories, libraryImages, type LibraryItem } from "@/lib/library-data";
+import { libraryCategories, libraryImages } from "@/lib/library-data";
 
 export function ImageLibrary() {
-  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
-  const filteredImages = libraryImages.filter((img) => {
-    const matchesCategory = selectedCategory === "All" || img.category === selectedCategory;
-    const matchesSearch =
-      searchQuery.trim() === "" ||
-      img.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      img.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      img.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
-  });
-
-  const handleSelectImage = (item: LibraryItem) => {
-    if (typeof window !== "undefined") {
-      if (window.location.pathname === "/split") {
-        window.dispatchEvent(
-          new CustomEvent("picsnips:load-image", {
-            detail: {
-              src: item.src,
-              name: `${item.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}.png`,
-            },
-          })
-        );
-        document.getElementById("splitter")?.scrollIntoView({ behavior: "smooth" });
-      } else {
-        router.push(
-          `/split?image=${encodeURIComponent(item.src)}&name=${encodeURIComponent(item.title)}`
-        );
-      }
-    }
-  };
+  const [searchQuery, setSearchQuery] = useState("");
+  const query = searchQuery.trim().toLowerCase();
+  const filteredImages = libraryImages.filter((item) =>
+    (selectedCategory === "All" || item.category === selectedCategory) &&
+    [item.title, item.description, ...item.tags].some((value) => value.toLowerCase().includes(query)),
+  );
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
+    <div className="site-width pb-20 pt-14 sm:pb-28 sm:pt-24">
       <SectionHeading
         as="h1"
-        eyebrow="Curated Collection"
-        title="Stock & Preset Images"
-        body="Pick any image below. Click 'Split in App' to load it directly into the 20-image splitter with zero upload required."
+        title="Image Library"
+        body="Explore curated panoramas and wallpapers. Open any image in the splitter to make it your own."
       />
 
-      {/* Search & Filter Controls */}
-      <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-        {/* Category Pills */}
-        <div className="flex flex-wrap items-center gap-2">
-          {libraryCategories.map((cat) => (
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-y border-line py-3">
+        <div role="group" aria-label="Image categories" className="flex flex-wrap gap-1.5">
+          {libraryCategories.map((category) => (
             <button
-              key={cat}
+              key={category}
               type="button"
-              onClick={() => setSelectedCategory(cat)}
-              className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium transition",
-                selectedCategory === cat
-                  ? "bg-foreground text-background shadow-md"
-                  : "border border-border bg-card/60 text-muted-foreground hover:text-foreground hover:bg-white/5"
-              )}
+              aria-pressed={selectedCategory === category}
+              onClick={() => setSelectedCategory(category)}
+              className="min-h-10 rounded-full px-3 text-sm transition-colors hover:bg-card aria-pressed:bg-primary aria-pressed:text-primary-foreground"
             >
-              {cat}
-              <span className="ml-1.5 text-xs opacity-60">
-                {cat === "All" ? libraryImages.length : libraryImages.filter((i) => i.category === cat).length}
+              {category}
+              <span className="ml-1.5 font-mono text-xs opacity-70">
+                {category === "All" ? libraryImages.length : libraryImages.filter((item) => item.category === category).length}
               </span>
             </button>
           ))}
         </div>
-
-        {/* Search Input */}
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <label className="relative block w-full sm:w-60">
+          <span className="sr-only">Search the image library</span>
+          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
-            type="text"
-            placeholder="Search Interstellar, Space, Art..."
+            type="search"
+            placeholder="Search images"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-full border border-border bg-card/80 py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            onChange={(event) => setSearchQuery(event.target.value)}
+            className="min-h-10 w-full rounded-full border border-input bg-card py-2 pl-9 pr-3 text-sm placeholder:text-muted-foreground focus-visible:outline-2"
           />
-        </div>
+        </label>
       </div>
 
-      {/* Image Grid */}
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-[10px] grid gap-[10px] sm:grid-cols-2 lg:grid-cols-3">
         {filteredImages.map((item) => (
-          <div
-            key={item.id}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-border dark:border-white/10 bg-card transition hover:border-foreground/25 hover:shadow-lg dark:hover:shadow-[0_20px_50px_-25px_rgba(0,0,0,0.8)]"
-          >
-            {/* Image Thumbnail */}
-            <div className="relative aspect-[16/9] w-full overflow-hidden bg-black/60">
-              <img
+          <article key={item.id} className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card p-[10px]">
+            <div className="relative aspect-video w-full overflow-hidden rounded-[10px] bg-neutral-800">
+              <Image
                 src={item.src}
                 alt={item.title}
-                loading="lazy"
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                fill
+                sizes="(max-width: 639px) 92vw, (max-width: 1023px) 46vw, 394px"
+                className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-[1.035]"
               />
-              
-              {/* Overlay Badges */}
-              <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                <span className="rounded-full bg-black/70 px-2.5 py-0.5 text-[11px] font-mono text-white/90 backdrop-blur-md border border-white/10">
-                  {item.width} × {item.height}
-                </span>
-                <span className="rounded-full bg-primary/80 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-md">
-                  {item.slices} slices
-                </span>
-              </div>
+              <span className="absolute bottom-2 left-2 rounded-full bg-black/75 px-2 py-1 font-mono text-[10px] text-white">
+                {item.width} × {item.height}
+              </span>
             </div>
-
-            {/* Card Body */}
-            <div className="flex flex-1 flex-col justify-between p-4">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    {item.category}
-                  </span>
-                  <span className="text-xs font-mono text-muted-foreground">
-                    Ratio {item.aspectRatio}
-                  </span>
-                </div>
-                <h3 className="mt-1.5 text-base font-semibold tracking-tight text-foreground line-clamp-1">
-                  {item.title}
-                </h3>
-                <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                  {item.description}
-                </p>
-
-                {/* Tags */}
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {item.tags.slice(0, 3).map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-muted-foreground font-mono"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-white/5">
-                <Button
-                  type="button"
-                  onClick={() => handleSelectImage(item)}
-                  className="w-full rounded-full gap-2 text-xs font-medium"
-                  size="sm"
-                >
-                  <Scissors className="size-3.5" />
-                  Split this Image
+            <div className="flex flex-1 flex-col px-2 pb-2 pt-4">
+              <p className="text-xs text-muted-foreground">{item.category}</p>
+              <h2 className="mt-1 text-lg font-medium tracking-tight">{item.title}</h2>
+              <p className="mt-2 flex-1 text-sm leading-5 text-muted-foreground">{item.description}</p>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+                <span className="font-mono text-[11px] text-muted-foreground">{item.aspectRatio}:1 · {item.slices} slices</span>
+                <Button asChild variant="outline" className="rounded-full bg-card">
+                  <Link href={{ pathname: "/split", query: { image: item.src, name: item.title } }} prefetch={false}>
+                    <Scissors aria-hidden="true" className="size-3.5" /> Split this image
+                  </Link>
                 </Button>
               </div>
             </div>
-          </div>
+          </article>
         ))}
       </div>
 
       {filteredImages.length === 0 && (
-        <div className="py-16 text-center text-muted-foreground">
-          <p className="text-base font-medium">No images matched &quot;{searchQuery}&quot;</p>
+        <div className="rounded-2xl border border-border bg-card px-6 py-14 text-center" role="status">
+          <p>No images match your search.</p>
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            className="editorial-button mt-4"
             onClick={() => {
               setSelectedCategory("All");
               setSearchQuery("");
             }}
-            className="mt-4 rounded-full"
           >
-            Clear Filters
+            Clear filters
           </Button>
         </div>
       )}
 
-      {/* Footer info note */}
-      <div className="mt-12 rounded-2xl border border-dashed border-border dark:border-white/10 p-6 text-center text-sm text-muted-foreground bg-muted/20 dark:bg-white/[0.01]">
-        <p>
-          Want to split your own image instead?{" "}
-          <Link
-            href="/split"
-            className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
-          >
-            Launch the splitter tool
-          </Link>
-          .
-        </p>
-      </div>
+      <p className="mt-8 text-sm text-muted-foreground">
+        Have an image of your own? <Link href="/split" className="text-foreground underline underline-offset-4">Open the splitter</Link>.
+      </p>
     </div>
   );
 }

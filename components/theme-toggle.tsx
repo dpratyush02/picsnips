@@ -15,7 +15,7 @@ function getSnapshot(): Theme {
 }
 
 function getServerSnapshot(): Theme {
-  return "dark";
+  return "light";
 }
 
 export function ThemeToggle({ className }: { className?: string }) {
@@ -87,9 +87,9 @@ export function ThemeToggle({ className }: { className?: string }) {
           className="flex items-center justify-center"
         >
           {isDark ? (
-            <Sun className="size-4 text-amber-300" />
+            <Sun className="size-4" />
           ) : (
-            <Moon className="size-4 text-indigo-600" />
+            <Moon className="size-4" />
           )}
         </motion.span>
       </AnimatePresence>

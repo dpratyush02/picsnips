@@ -1,79 +1,105 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
-import { scenes } from "@/components/scenes";
-import { Button } from "@/components/ui/button";
+import { ArrowUpRight, AudioLines, Columns3, Film, Images, Layers, Scissors } from "lucide-react";
+import { HeroMotion } from "@/components/hero-motion";
+import { HeroNavigation } from "@/components/hero-navigation";
+import { scenes, sceneSplitterHref } from "@/components/scenes";
 
-export function Hero() {
-  const reduce = useReducedMotion();
+const featured = scenes[0];
+const shortcuts = [
+  { name: "Image Splitter", href: "/split", tile: "split", Icon: Columns3 },
+  { name: "Scroll Animation Maker", href: "/tools/scroll-animation", tile: "frames", Icon: Film },
+  { name: "Image Library", href: "/library", tile: "library", Icon: Images },
+  { name: "Auto Enhance", href: "/tools/voice-enhancer", tile: "audio", Icon: AudioLines },
+  { name: "Split preview", href: "#demo", tile: "preview", Icon: Scissors },
+  { name: "Made with PicSnips", href: "#examples", tile: "gallery", Icon: Layers },
+];
 
+export function Hero({ voiceReady }: { voiceReady: boolean }) {
   return (
-    <section className="px-6 pt-16 pb-8 sm:pt-24">
-      <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        <motion.div
-          initial={reduce ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: "easeOut" }}
-        >
-          <p className="inline-flex items-center rounded-full border border-border bg-muted/60 dark:border-white/10 dark:bg-white/5 px-3 py-1 text-xs font-medium text-muted-foreground">
-            Built for X&apos;s new 20-image feature
-          </p>
-          <h1 className="mt-6 max-w-xl text-4xl font-semibold tracking-[-0.045em] text-balance sm:text-6xl sm:leading-[1.05]">
-            One Image. Twenty Pieces. One Epic Post.
+    <section className="hero-section" aria-labelledby="hero-title">
+      <HeroMotion>
+        <div className="hero-grid" aria-hidden="true" />
+        <div className="hero-copy">
+          <a href="#tools" className="hero-badge">
+            <span>Free</span>
+            Browser-based creator tools
+          </a>
+          <h1 id="hero-title" className="hero-title">
+            Your creative toolkit.<br />
+            Without the <span>complexity.</span>
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-7 text-pretty text-muted-foreground sm:text-lg">
-            Turn any image into a stunning 20-image X post in seconds. No Photoshop. No manual cropping. Just upload, split, and post.
+          <p className="hero-description">
+            Edit images, video, and audio.<br className="hidden sm:inline" />
+            {" "}Free to use. No signup required.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button asChild className="h-12 rounded-full px-6 text-[15px]">
-              <Link href="/split">Start Splitting — It&apos;s Free</Link>
-            </Button>
-            <Button asChild variant="outline" className="h-12 rounded-full px-6 text-[15px]">
-              <Link href="/#demo">Watch Demo Video</Link>
-            </Button>
-            <Button asChild variant="ghost" className="h-12 rounded-full px-5 text-[15px] text-muted-foreground hover:text-foreground">
-              <Link href="/library">Stock Library</Link>
-            </Button>
-          </div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={reduce ? false : { opacity: 0, y: 22 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
-          className="relative"
-        >
-          <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,rgba(251,146,60,0.16),transparent_65%)]" />
-          <div className="overflow-hidden rounded-[1.6rem] border border-border dark:border-white/10 bg-card shadow-[0_40px_120px_-48px_rgba(0,0,0,0.4)] dark:shadow-[0_40px_120px_-48px_rgba(0,0,0,0.9)]">
-            <div className="hero-strips flex h-64 w-full sm:h-80 gap-0.5 bg-black">
-              {scenes[0].slices.map((sliceUrl, index) => (
-                <div
-                  key={index}
-                  className="h-full min-w-0 flex-1 bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url("${sliceUrl}")`,
-                  }}
-                />
-              ))}
-            </div>
-            <div className="flex items-center justify-between border-t border-border dark:border-white/10 px-4 py-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5 font-medium text-foreground">
-                <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-                Real X Post: Spider-Man 20-Piece Split
+        <HeroNavigation />
+
+        <nav aria-label="Creative tool shortcuts" className="hero-shortcuts">
+          {shortcuts.filter(({ tile }) => tile !== "audio" || voiceReady).map(({ name, href, tile, Icon }) => (
+            <Link key={tile} href={href} prefetch={false} className="hero-shortcut" data-tile={tile} aria-label={name}>
+              <span className="hero-shortcut-face">
+                <span className="hero-shortcut-glyph"><Icon aria-hidden="true" strokeWidth={1.55} /></span>
               </span>
-              <a
-                href={scenes[0].tweetUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="font-mono text-xs hover:text-foreground transition"
-              >
-                01 → 20 • View on X ↗
-              </a>
+              <span className="hero-shortcut-label" aria-hidden="true">{name}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <figure className="hero-workspace" aria-label="PicSnips Image Splitter preview">
+          <div className="hero-window">
+            <div className="hero-window-top">
+              <div className="flex min-w-0 items-center gap-2 font-medium">
+                <span className="grid size-6 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
+                  <Columns3 aria-hidden="true" className="size-3.5" />
+                </span>
+                <span>Image Splitter</span>
+              </div>
+              <Link href={sceneSplitterHref(featured)} prefetch={false} className="hero-window-link">
+                Try this image <ArrowUpRight aria-hidden="true" className="size-3.5" />
+              </Link>
+            </div>
+            <div className="hero-window-body">
+              <div className="hero-window-sidebar">
+                <p className="font-medium">{featured.title}</p>
+                <dl className="mt-4 space-y-3 border-t border-border pt-3 text-xs">
+                  <div className="flex flex-wrap justify-between gap-x-2 gap-y-0.5">
+                    <dt className="text-muted-foreground">Layout</dt>
+                    <dd>Vertical</dd>
+                  </div>
+                  <div className="flex flex-wrap justify-between gap-x-2 gap-y-0.5">
+                    <dt className="text-muted-foreground">Slices</dt>
+                    <dd>{featured.slices.length}</dd>
+                  </div>
+                </dl>
+                <a href={featured.tweetUrl} target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+                  View on X <ArrowUpRight aria-hidden="true" className="size-3" />
+                </a>
+              </div>
+              <div className="min-w-0">
+                <ol className="hero-slice-ruler" aria-label="Order of the 20 slices">
+                  {featured.slices.map((slice, index) => (
+                    <li key={slice}>{String(index + 1).padStart(2, "0")}</li>
+                  ))}
+                </ol>
+                <div className="hero-window-image">
+                  <Image
+                    src={featured.fullSrc}
+                    alt="Spider-Man overlooking a city, shown as a panorama split into 20 numbered columns"
+                    fill
+                    preload
+                    sizes="(max-width: 767px) 92vw, (max-width: 2020px) 56vw, 1160px"
+                    className="object-cover object-[50%_64%]"
+                  />
+                  <div aria-hidden="true" className="hero-slice-lines absolute inset-0" />
+                </div>
+              </div>
             </div>
           </div>
-        </motion.div>
-      </div>
+        </figure>
+      </HeroMotion>
     </section>
   );
 }

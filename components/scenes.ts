@@ -58,6 +58,12 @@ export const scenes: Scene[] = [
   },
 ];
 
-export function sceneSrc(scene: Scene): string {
-  return scene.fullSrc;
+export function sceneSplitterHref(scene: Scene) {
+  return {
+    pathname: "/split",
+    query: {
+      image: scene.fullSrc,
+      name: `${scene.id}-original.${scene.fullSrc.split(".").at(-1)}`,
+    },
+  };
 }

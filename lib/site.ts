@@ -9,4 +9,4 @@ export const defaultCaption = "One image. Twenty pieces.";
 export const maxCaptionLength = 280;
 
 export const seoDescription =
-  "Split any image into 20 parts for a panoramic X (Twitter) post. Free 20 image X post maker and Twitter image splitter. No upload — it runs in your browser.";
+  "Free browser-based creative tools. Split an image into up to 20 tiles for X, turn a video or GIF into frames, and explore a curated image library. No signup required.";

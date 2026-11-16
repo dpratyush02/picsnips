@@ -30,21 +30,21 @@ const guideSteps = [
 
 export function SplitInstructions() {
   return (
-    <section className="scroll-mt-24 px-6 pb-20 pt-8 sm:pb-28">
-      <div className="mx-auto max-w-6xl">
+    <section className="scroll-mt-24 site-width pb-20 pt-8 sm:pb-28">
+      <div className="border-t border-line pt-8">
         <SectionHeading
           eyebrow="Quick Guide"
           title="How to split an image for X"
           body="Turn any image into a multi-tile X post in under two minutes without Photoshop or complex cropping tools."
         />
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-[10px] sm:grid-cols-2 lg:grid-cols-4">
           {guideSteps.map((item) => {
             const Icon = item.icon;
             return (
               <div
                 key={item.step}
-                className="relative flex flex-col rounded-3xl border border-border dark:border-white/10 bg-card p-6 shadow-sm backdrop-blur-sm"
+                className="relative flex flex-col rounded-2xl bg-card p-5"
               >
                 <div className="flex items-center justify-between">
                   <span className="flex size-11 items-center justify-center rounded-2xl border border-border dark:border-white/10 bg-muted/60 dark:bg-white/5 text-primary">

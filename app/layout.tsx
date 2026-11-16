@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const title = "PicSnips — Free 20 Image Splitter for X (Twitter)";
+const title = "PicSnips — Free Creator Toolkit & Image Splitter";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -31,6 +31,8 @@ export const metadata: Metadata = {
     "Twitter image splitter",
     "split image into 20 parts",
     "X panoramic post maker",
+    "video to frames",
+    "free creator tools",
     "PicSnips",
   ],
   openGraph: {
@@ -49,8 +51,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#09090b",
-  colorScheme: "dark light",
+  themeColor: "#ffffff",
+  colorScheme: "light dark",
 };
 
 const websiteJsonLd = {
@@ -61,10 +63,15 @@ const websiteJsonLd = {
   description: seoDescription,
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
+      data-theme="light"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
@@ -72,7 +79,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var s=localStorage.getItem("theme");var p=window.matchMedia("(prefers-color-scheme:dark)").matches;var t=s?s:(p?"dark":"light");if(t==="dark"){document.documentElement.classList.add("dark");document.documentElement.setAttribute("data-theme","dark");}else{document.documentElement.classList.remove("dark");document.documentElement.setAttribute("data-theme","light");}}catch(e){}})();`,
+            __html: `(function() {
+              var dark = false;
+              try { dark = localStorage.getItem("theme") === "dark"; } catch {}
+              var root = document.documentElement;
+              root.classList.toggle("dark", dark);
+              root.setAttribute("data-theme", dark ? "dark" : "light");
+              var themeColor = document.querySelector('meta[name="theme-color"]');
+              if (themeColor) themeColor.setAttribute("content", dark ? "#000000" : "#ffffff");
+            })();`,
           }}
         />
       </head>

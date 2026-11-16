@@ -31,7 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { SectionHeading } from "@/components/section-heading";
+import { ToolPageIntro } from "@/components/tool-page-intro";
 import { SliceFrame } from "@/components/splitter/slice-frame";
 import { XPostPreview } from "@/components/splitter/x-post-preview";
 import { ToolErrorBoundary } from "@/components/tool-error-boundary";
@@ -100,19 +100,15 @@ function orderHint(rows: number, cols: number, count: number): string {
 
 export function ImageSplitter() {
   return (
-    <section id="splitter" className="scroll-mt-24 px-6 py-10 sm:py-16">
-      <div className="mx-auto max-w-6xl">
-        <SectionHeading
-          as="h1"
-          eyebrow="The Splitter"
-          title="Free Image Splitter for X"
-          body="Cuts happen in your browser. The file is never uploaded, and the pieces stay in the exact numerical order X expects."
-        />
-        <div className="mt-12">
-          <ToolErrorBoundary>
-            <SplitterTool />
-          </ToolErrorBoundary>
-        </div>
+    <section id="splitter" className="site-width scroll-mt-24 py-10 sm:py-16">
+      <ToolPageIntro
+        title="Free Image Splitter for X"
+        body="Cut one image into 2 to 20 numbered tiles in your browser. Preview the layout and download the pieces in order."
+      />
+      <div className="mt-8">
+        <ToolErrorBoundary>
+          <SplitterTool />
+        </ToolErrorBoundary>
       </div>
     </section>
   );
@@ -573,7 +569,7 @@ function SplitterTool() {
   }, [inspect, count]);
 
   return (
-    <div className="rounded-[2rem] border border-border bg-card/70 p-4 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.8)] sm:p-6 lg:p-8">
+    <div className="rounded-2xl border border-border bg-card p-[10px] sm:p-5">
       <input
         id={inputId}
         ref={inputRef}
@@ -618,10 +614,10 @@ function SplitterTool() {
             takeFiles(event.dataTransfer.files);
           }}
           className={cn(
-            "flex min-h-[360px] cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed px-6 text-center transition outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+            "flex min-h-[320px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed px-4 sm:px-6 text-center transition outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
             dragging
               ? "border-foreground bg-foreground/5"
-              : "border-border dark:border-white/15 bg-muted/20 dark:bg-white/[0.02] hover:border-foreground/30 hover:bg-muted/40 dark:hover:border-white/30 dark:hover:bg-white/[0.04]",
+              : "border-input bg-muted/50 hover:border-foreground/50 hover:bg-muted",
           )}
         >
           <span className="flex size-14 items-center justify-center rounded-2xl border border-border dark:border-white/10 bg-muted/60 dark:bg-white/5">
@@ -637,12 +633,12 @@ function SplitterTool() {
             Browse files
           </span>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1 font-medium text-emerald-500 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1 font-medium text-foreground">
               <Check className="size-3.5" />
               Free to use
             </span>
             <span className="text-muted-foreground/30">•</span>
-            <span className="inline-flex items-center gap-1 font-medium text-emerald-500 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1 font-medium text-foreground">
               <Check className="size-3.5" />
               No signup required
             </span>
@@ -665,7 +661,7 @@ function SplitterTool() {
             variant="ghost"
             className="rounded-full px-4 text-muted-foreground hover:text-foreground border border-border dark:border-white/5 bg-muted/40 dark:bg-white/[0.03]"
           >
-            <Link href="/library">Browse Stock Library (15+)</Link>
+            <Link href="/library">Browse Image Library</Link>
           </Button>
         </div>
         </div>

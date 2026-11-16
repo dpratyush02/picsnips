@@ -32,7 +32,7 @@ const appJsonLd = {
 
 export default function SplitPage() {
   return (
-    <SiteFrame>
+    <SiteFrame showFaqLink={false}>
       <main className="min-h-[85vh]">
         <script
           type="application/ld+json"

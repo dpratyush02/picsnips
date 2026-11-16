@@ -3,19 +3,19 @@ export function SectionHeading({
   title,
   body,
   as: HeadingTag = "h2",
+  align = "left",
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
-  body: string;
+  body?: string;
   as?: "h1" | "h2";
+  align?: "left" | "center";
 }) {
   return (
-    <div className="mx-auto max-w-2xl text-center">
-      <p className="text-sm font-medium text-muted-foreground">{eyebrow}</p>
-      <HeadingTag className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-        {title}
-      </HeadingTag>
-      <p className="mt-4 text-base leading-7 text-pretty text-muted-foreground">{body}</p>
+    <div className={align === "center" ? "mx-auto max-w-[42rem] text-center" : "max-w-[42rem]"}>
+      {eyebrow && <p className="mb-3 font-mono text-xs uppercase tracking-[0.06em] text-muted-foreground">{eyebrow}</p>}
+      <HeadingTag className={HeadingTag === "h1" ? "display-title" : "section-title"}>{title}</HeadingTag>
+      {body && <p className="mt-3 text-base leading-6 text-pretty text-muted-foreground">{body}</p>}
     </div>
   );
 }

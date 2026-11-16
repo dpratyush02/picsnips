@@ -250,8 +250,8 @@ void main() {
 `;
 
 const RIM_COLORS: Record<Theme, [number, number, number]> = {
-  dark: [0.03, 0.03, 0.05], // deep organic ink pigment
-  light: [0.99, 0.98, 0.96], // bright clean bleach/wash pigment
+  dark: [0, 0, 0],
+  light: [1, 1, 1],
 };
 
 const SPREAD = {
@@ -528,20 +528,17 @@ class InkTransitionManager {
 export const inkManager = new InkTransitionManager();
 
 export function getCurrentTheme(): Theme {
-  if (typeof document === "undefined") return "dark";
+  if (typeof document === "undefined") return "light";
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
 export function applyTheme(theme: Theme): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  if (theme === "dark") {
-    root.classList.add("dark");
-    root.setAttribute("data-theme", "dark");
-  } else {
-    root.classList.remove("dark");
-    root.setAttribute("data-theme", "light");
-  }
+  const dark = theme === "dark";
+  root.classList.toggle("dark", dark);
+  root.setAttribute("data-theme", theme);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#000000" : "#ffffff");
   try {
     localStorage.setItem("theme", theme);
   } catch {}

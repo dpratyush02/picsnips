@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function LibraryPage() {
   return (
-    <SiteFrame>
+    <SiteFrame showFaqLink={false}>
       <main className="min-h-[80vh]">
         <ImageLibrary />
       </main>
