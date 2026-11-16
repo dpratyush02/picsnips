@@ -8,6 +8,8 @@ import { SiteFrame } from "@/components/site-frame";
 import { SplitterTeaser } from "@/components/splitter-teaser";
 import { LibraryTeaser } from "@/components/library-teaser";
 import { Examples } from "@/components/examples";
+import { VoiceAnnouncement } from "@/components/voice/announcement";
+import { hasVoiceRuntime } from "@/lib/voice/availability";
 
 export const metadata: Metadata = {
   alternates: {
@@ -19,6 +21,7 @@ export default function HomePage() {
   return (
     <SiteFrame>
       <main>
+        {hasVoiceRuntime() && <VoiceAnnouncement />}
         <Hero />
         <DemoVideo />
         <SplitterTeaser />

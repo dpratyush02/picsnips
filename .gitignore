@@ -44,3 +44,7 @@ next-env.d.ts
 lv_0_*.mp4
 /image-library/
 scratch_*.json
+
+# Generated browser audio runtimes
+/public/voice-assets/
+/public/voice-assets.next/

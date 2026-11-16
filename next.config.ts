@@ -4,6 +4,12 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  async headers() {
+    return [{
+      source: "/voice-assets/:directory(deepfilter|ffmpeg|core)/:asset*",
+      headers: [{ key: "Cache-Control", value: "public, max-age=86400, must-revalidate" }],
+    }];
+  },
   async redirects() {
     return [
       {

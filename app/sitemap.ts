@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
+import { hasVoiceRuntime } from "@/lib/voice/availability";
 import { siteUrl } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
   return [
+    ...(hasVoiceRuntime() ? [{ url: `${siteUrl}/tools/voice-enhancer`, lastModified, changeFrequency: "monthly" as const, priority: 0.8 }] : []),
     {
       url: `${siteUrl}/`,
       lastModified,

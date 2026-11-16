@@ -1,0 +1,19 @@
+FFmpeg.wasm
+
+PicSnips uses the upstream browser wrapper @ffmpeg/ffmpeg 0.12.15
+and the single-threaded @ffmpeg/core 0.12.10 for media processing.
+
+The browser wrapper is under the MIT license. The stock core is
+GPL-2.0-or-later and includes libraries under their respective licenses.
+
+Matching upstream release and source:
+https://github.com/ffmpegwasm/ffmpeg.wasm/releases/tag/v12.15
+https://github.com/ffmpegwasm/ffmpeg.wasm/archive/refs/tags/v12.15.tar.gz
+
+Build recipe and dependency sources:
+https://github.com/ffmpegwasm/ffmpeg.wasm/blob/v12.15/Dockerfile
+
+Upstream licensing:
+https://ffmpegwasm.netlify.app/docs/faq/#what-is-the-license-of-ffmpegwasm
+https://ffmpeg.org/legal.html
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
