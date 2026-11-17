@@ -64,6 +64,7 @@ import {
   type SplitSession,
 } from "@/lib/split-image";
 import { createPublisher } from "@/lib/x-publish";
+import { trackEvent } from "@/lib/analytics";
 
 type SplitMode = "vertical" | "horizontal" | "grid";
 type Phase = "idle" | "reading" | "splitting" | "ready" | "error";
@@ -197,6 +198,7 @@ function SplitterTool() {
     setReadyKey("");
     setStatus("Waiting for an image");
     setInspect(null);
+    trackEvent("file_removed");
     toast.message("Image removed");
   }, [replacePieces]);
 
@@ -204,15 +206,19 @@ function SplitterTool() {
     async (file: File) => {
       const token = ++ingestRef.current;
       const type = resolveImageType(file);
+      trackEvent("file_selected", { media_type: "image", file_size_mb: Math.round(file.size / 1024 / 1024 * 100) / 100 });
       if (!type) {
+        trackEvent("file_failed", { reason: "unsupported_format" });
         toast.error("Use a PNG, JPG, or WebP image.");
         return;
       }
       if (file.size === 0) {
+        trackEvent("file_failed", { reason: "empty_file" });
         toast.error("That file is empty.");
         return;
       }
       if (file.size > MAX_FILE_BYTES) {
+        trackEvent("file_failed", { reason: "file_too_large" });
         toast.error("That file is over 50 MB. Try a smaller image.");
         return;
       }
@@ -240,6 +246,7 @@ function SplitterTool() {
         ) {
           session.dispose();
           const tooBig = session.width > MAX_DIMENSION || session.height > MAX_DIMENSION || session.width * session.height > MAX_PIXELS;
+          trackEvent("file_failed", { reason: "dimensions" });
           toast.error(
             tooBig
               ? "That image is larger than this browser can split reliably. Keep it under 32 megapixels and 16,000 pixels on the long side."
@@ -264,10 +271,12 @@ function SplitterTool() {
         };
         sourceRef.current = nextSource;
         setSource(nextSource);
+        trackEvent("file_loaded", { media_type: "image", format: type, width: session.width, height: session.height });
         toast.success("Image ready to split.");
       } catch (error) {
         if (token !== ingestRef.current) return;
         if (isAbortError(error)) return;
+        trackEvent("file_failed", { reason: "decode_failed" });
         toast.error(
           error instanceof Error
             ? error.message
@@ -319,6 +328,15 @@ function SplitterTool() {
     const key = splitKey;
 
     const timer = window.setTimeout(() => {
+      const started = performance.now();
+      const details = {
+        operation: "split" as const,
+        format,
+        rows: layout.rowRanges.length,
+        cols: layout.colRanges.length,
+        count: rects.length,
+      };
+      trackEvent("processing_started", details);
       setPhase("splitting");
       setProgress({ done: 0, total: rects.length });
       setStatus(`Splitting 0 of ${rects.length}`);
@@ -371,8 +389,10 @@ function SplitterTool() {
           setPhase("ready");
           setStatus(`${next.length} images ready`);
           setReadyTick((value) => value + 1);
+          trackEvent("processing_completed", { ...details, elapsed_ms: Math.round(performance.now() - started) });
         } catch (error) {
           if (isAbortError(error) || job !== jobRef.current) return;
+          trackEvent("processing_failed", details);
           const message =
             error instanceof Error ? error.message : "Could not split this image.";
           replacePieces([]);
@@ -503,7 +523,7 @@ function SplitterTool() {
         }),
         setZipProgress,
       );
-      downloadBlob(blob, archiveFilename(pieces.length, rows, cols));
+      downloadBlob(blob, archiveFilename(pieces.length, rows, cols), pieces.length);
       toast.success(`Downloaded ${pieces.length} images in a ZIP.`, {
         description: "They are numbered from 01. Attach them to X in that order.",
       });

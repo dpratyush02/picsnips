@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
 import { InkCanvas } from "@/components/ink-canvas";
+import { PostHogAnalytics } from "@/components/posthog-analytics";
 import { seoDescription, siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -100,6 +102,9 @@ export default function RootLayout({
         {children}
         <Toaster />
         <Analytics />
+        <Suspense fallback={null}>
+          <PostHogAnalytics />
+        </Suspense>
       </body>
     </html>
   );

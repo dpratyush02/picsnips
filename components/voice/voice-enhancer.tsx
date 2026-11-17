@@ -5,6 +5,7 @@ import { AudioLines, Check, Download, LockKeyhole, Trash2, Upload } from 'lucide
 import { Button } from '@/components/ui/button';
 import { downloadBlob } from '@/lib/download';
 import { formatBytes } from '@/lib/files';
+import { trackEvent, type AnalyticsProperties } from '@/lib/analytics';
 import type { EnhanceAction, EnhanceResult } from '@/lib/voice/adaptive';
 import type { RuntimeManifest } from '@/lib/voice/runtime';
 
@@ -81,14 +82,27 @@ export default function VoiceEnhancer() {
     setError('');
     setVideoError(false);
   }
-  async function run(label: string, task: (signal: AbortSignal) => Promise<void>) {
+  async function run(operation: 'load' | 'enhance' | 'export', label: string, task: (signal: AbortSignal) => Promise<void>, details: AnalyticsProperties = {}) {
     job.current?.abort();
     const controller = new AbortController();
     job.current = controller;
     setError('');
     setStatus({label, value: null});
-    try { await task(controller.signal); }
+    const events = {
+      load: ['file_selected', 'file_loaded', 'file_failed', 'file_cancelled'],
+      enhance: ['processing_started', 'processing_completed', 'processing_failed', 'processing_cancelled'],
+      export: ['export_started', 'export_completed', 'export_failed', 'export_cancelled'],
+    } as const;
+    const [startedEvent, completedEvent, failedEvent, cancelledEvent] = events[operation];
+    const properties = { ...details, operation };
+    const started = performance.now();
+    trackEvent(startedEvent, properties);
+    try {
+      await task(controller.signal);
+      if (!controller.signal.aborted) trackEvent(completedEvent, { ...properties, elapsed_ms: Math.round(performance.now() - started) });
+    }
     catch (err) {
+      trackEvent(controller.signal.aborted ? cancelledEvent : failedEvent, { ...properties, elapsed_ms: Math.round(performance.now() - started) });
       if (job.current === controller) setError(controller.signal.aborted ? 'Processing cancelled.' : err instanceof Error ? err.message : 'Processing failed. Try a shorter recording.');
     } finally {
       if (job.current === controller) { job.current = null; setStatus(null); }
@@ -100,7 +114,7 @@ export default function VoiceEnhancer() {
   function upload(file?: File) {
     if (!file) return;
     clearRecording();
-    void run('Opening your recording…', async signal => {
+    void run('load', 'Opening your recording…', async signal => {
       const [{validateFile, isVideo, decodeAudio, extractAudio, cancelled}, {waveform, wavBytes}, {checkRuntime}] = await Promise.all([
         import('@/lib/voice/media'), import('@/lib/voice/dsp'), import('@/lib/voice/runtime'),
       ]);
@@ -128,13 +142,13 @@ export default function VoiceEnhancer() {
       if (!samples.length) throw new Error('No audio samples were found.');
       const originalUrl = own(new Blob([wavBytes(samples, 24)], {type: 'audio/wav'}));
       setSource({file, samples, peaks: waveform(samples), originalUrl, manifest, videoUrl: videoInput ? own(file) : undefined});
-    });
+    }, { media_type: file.type.startsWith('video/') ? 'video' : 'audio', file_size_mb: Math.round(file.size / 1024 / 1024 * 100) / 100 });
   }
   function enhanceVoice() {
     if (!source || job.current) return;
     player.current?.pause();
     video.current?.pause();
-    void run('Analyzing your recording…', async signal => {
+    void run('enhance', 'Analyzing your recording…', async signal => {
       const [{enhance}, {waveform, wavBytes}] = await Promise.all([import('@/lib/voice/client'), import('@/lib/voice/dsp')]);
       if (signal.aborted) throw new Error('Processing cancelled.');
       const result = await enhance(source.samples, source.manifest, signal, (value, label) => updateProgress(signal, value, label));
@@ -143,12 +157,12 @@ export default function VoiceEnhancer() {
       clearOutput();
       setOutput({...result, peaks: waveform(result.samples), url});
       setTrack('enhanced');
-    });
+    }, { duration_seconds: Math.round(source.samples.length / 48000), media_type: source.videoUrl ? 'video' : 'audio' });
   }
   function save(kind: 'wav' | 'mp3' | 'video') {
     if (!output || !source || job.current) return;
     const base = source.file.name.replace(/\.[^.]+$/, '');
-    void run('Preparing download…', async signal => {
+    void run('export', 'Preparing download…', async signal => {
       const {wavBytes} = await import('@/lib/voice/dsp');
       if (signal.aborted) throw new Error('Processing cancelled.');
       if (kind === 'wav') {
@@ -159,7 +173,7 @@ export default function VoiceEnhancer() {
       const result = await encodeOutput(new Blob([wavBytes(output.samples, 24)], {type: 'audio/wav'}), source.file, kind, bitrate, source.manifest, signal, value => updateProgress(signal, value, 'Encoding download…'));
       if (signal.aborted) throw new Error('Processing cancelled.');
       downloadBlob(result.blob, `${base}_enhanced.${result.extension}`);
-    });
+    }, { format: kind, duration_seconds: Math.round(source.samples.length / 48000) });
   }
   function switchTrack(next: 'original' | 'enhanced') {
     const audio = player.current;
@@ -167,6 +181,7 @@ export default function VoiceEnhancer() {
     resume.current = {time: resume.current?.time ?? audio.currentTime, playing: resume.current?.playing ?? !audio.paused};
     audio.pause();
     setTrack(next);
+    trackEvent('comparison_switched', { comparison: next });
   }
   const duration = source ? source.samples.length / 48000 : 0;
   const peaks = track === 'enhanced' && output ? output.peaks : source?.peaks;
@@ -194,6 +209,7 @@ export default function VoiceEnhancer() {
               <p className="mt-1 text-sm text-muted-foreground">{formatBytes(source.file.size)} · {clock(duration)} · 48 kHz mono output</p>
             </div>
             <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => {
+              trackEvent('file_removed');
               clearRecording();
               uploadButton.current?.focus();
             }}>

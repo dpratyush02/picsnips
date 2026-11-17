@@ -1,6 +1,7 @@
 import JSZip from "jszip";
+import { trackEvent } from "@/lib/analytics";
 
-export function downloadBlob(blob: Blob, filename: string): void {
+export function downloadBlob(blob: Blob, filename: string, count = 1): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -10,6 +11,11 @@ export function downloadBlob(blob: Blob, filename: string): void {
   link.click();
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 15_000);
+  trackEvent("download_requested", {
+    format: blob.type,
+    file_count: count,
+    file_size_mb: Math.round(blob.size / 1024 / 1024 * 100) / 100,
+  });
 }
 
 export function downloadBlobs(files: { blob: Blob; name: string }[]): void {
@@ -21,13 +27,22 @@ export async function zipPieces(
   orderNote: string,
   onProgress?: (percent: number) => void,
 ): Promise<Blob> {
+  const started = performance.now();
+  trackEvent("export_started", { format: "zip", file_count: files.length });
   const zip = new JSZip();
   for (const file of files) zip.file(file.name, file.blob);
   zip.file("order.txt", orderNote);
-  return zip.generateAsync(
-    { type: "blob", compression: "STORE" },
-    (update) => onProgress?.(update.percent),
-  );
+  try {
+    const blob = await zip.generateAsync(
+      { type: "blob", compression: "STORE" },
+      (update) => onProgress?.(update.percent),
+    );
+    trackEvent("export_completed", { format: "zip", file_count: files.length, elapsed_ms: Math.round(performance.now() - started) });
+    return blob;
+  } catch (error) {
+    trackEvent("export_failed", { format: "zip", file_count: files.length });
+    throw error;
+  }
 }
 
 export function orderNote(details: {

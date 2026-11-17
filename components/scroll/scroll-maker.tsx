@@ -5,6 +5,7 @@ import { Upload, ChevronLeft, ChevronRight, Play, Pause, GripVertical } from 'lu
 import { Button } from '@/components/ui/button';
 import { formatBytes } from '@/lib/files';
 import { downloadBlob, zipPieces } from '@/lib/download';
+import { trackEvent } from '@/lib/analytics';
 import { createPublisher } from '@/lib/x-publish';
 import { frameName, pingPong, timestamps, type ExtractionMode } from '@/lib/scroll/plan';
 import type { LocalMedia } from '@/lib/scroll/media';
@@ -26,8 +27,25 @@ export default function ScrollMaker(){
   async function ingest(files:File[]){
     if(!files.length)return;job.current?.abort();sourceRef.current?.close();sourceRef.current=null;setSource(null);clear();setError('');setAck(false);setBusy(true);setStatus('Opening media…');
     const token=++generation.current,controller=new AbortController();job.current=controller;
-    try{const {openMedia}=await import('@/lib/scroll/media');const media=await openMedia(files,controller.signal);if(!mounted.current||token!==generation.current){media.close();return;}sourceRef.current=media;setSource(media);const end=media.info.duration;setSettings({start:0,end,count:media.info.kind==='sequence'?media.info.frames!:20,mode:'smooth',custom:timestamps(0,end,2),resolution:'1280'});setCustomTime(0);setStatus('Ready to extract.');}
-    catch(e){if(mounted.current&&token===generation.current){setError(e instanceof Error?e.message:'Could not open this file.');setStatus('');}}
+    trackEvent('file_selected', { file_count: files.length, file_size_mb: Math.round(files.reduce((sum, file) => sum + file.size, 0) / 1024 / 1024 * 100) / 100 });
+    try {
+      const {openMedia} = await import('@/lib/scroll/media');
+      const media = await openMedia(files, controller.signal);
+      if (!mounted.current || token !== generation.current) { media.close(); return; }
+      sourceRef.current = media;
+      setSource(media);
+      const end = media.info.duration;
+      setSettings({start:0,end,count:media.info.kind==='sequence'?media.info.frames!:20,mode:'smooth',custom:timestamps(0,end,2),resolution:'1280'});
+      setCustomTime(0);
+      setStatus('Ready to extract.');
+      trackEvent('file_loaded', { media_type: media.info.kind, width: media.info.width, height: media.info.height, duration_seconds: Math.round(end) });
+    } catch (e) {
+      trackEvent(controller.signal.aborted ? 'file_cancelled' : 'file_failed');
+      if (mounted.current && token === generation.current) {
+        setError(e instanceof Error ? e.message : 'Could not open this file.');
+        setStatus('');
+      }
+    }
     finally{if(mounted.current&&token===generation.current)setBusy(false);}
   }
   async function sample(kind:'video'|'gif'){
@@ -37,18 +55,39 @@ export default function ScrollMaker(){
   }
   async function extract(){
     if(!source||busy)return;clear();setBusy(true);setStatus('Preparing frames…');setError('');videoRef.current?.pause();const controller=new AbortController();job.current=controller;const token=++generation.current;
-    try{const {extractFrames}=await import('@/lib/scroll/extract');const result=await extractFrames(source,settings,controller.signal,(p,s)=>{if(mounted.current&&token===generation.current){setProgress(p);setStatus(s);}});if(!mounted.current||token!==generation.current){result.forEach(f=>URL.revokeObjectURL(f.url));return;}owned.current=result;setFrames(result);setStatus(`${result.length} frames ready. Review the motion before exporting.`);}
-    catch(e){if(mounted.current&&token===generation.current){setError(controller.signal.aborted?'Extraction cancelled.':e instanceof Error?e.message:'Extraction failed.');setStatus('');}}
+    const started = performance.now();
+    const details = { operation: 'extract' as const, count: settings.mode === 'custom' ? settings.custom.length : settings.count, mode: settings.mode, resolution: settings.resolution, duration_seconds: Math.round(settings.end - settings.start) };
+    trackEvent('processing_started', details);
+    try {
+      const {extractFrames} = await import('@/lib/scroll/extract');
+      const result = await extractFrames(source, settings, controller.signal, (p, s) => {
+        if (mounted.current && token === generation.current) { setProgress(p); setStatus(s); }
+      });
+      if (!mounted.current || token !== generation.current) { result.forEach(f => URL.revokeObjectURL(f.url)); return; }
+      owned.current = result;
+      setFrames(result);
+      setStatus(`${result.length} frames ready. Review the motion before exporting.`);
+      trackEvent('processing_completed', { ...details, count: result.length, elapsed_ms: Math.round(performance.now() - started) });
+    } catch (e) {
+      trackEvent(controller.signal.aborted ? 'processing_cancelled' : 'processing_failed', { ...details, elapsed_ms: Math.round(performance.now() - started) });
+      if (mounted.current && token === generation.current) {
+        setError(controller.signal.aborted ? 'Extraction cancelled.' : e instanceof Error ? e.message : 'Extraction failed.');
+        setStatus('');
+      }
+    }
     finally{if(mounted.current&&token===generation.current)setBusy(false);}
   }
   async function download(single=false){
     if(!frames.length||busy)return;setBusy(true);setPlaying(false);setError('');setProgress(0);const controller=new AbortController();job.current=controller;const token=++generation.current;
+    const started = performance.now();
+    const details = { format, file_count: single ? 1 : frames.length };
+    trackEvent('export_started', details);
     try{const {exportFrame}=await import('@/lib/scroll/extract');const entries:{blob:Blob;name:string}[]=[];const indices=single?[index]:frames.map((_,i)=>i);let bytes=0;
       for(let n=0;n<indices.length;n++){if(controller.signal.aborted)throw new Error('Export cancelled.');const i=indices[n];const blob=await exportFrame(frames[i],i,frames.length,format,overlay);if(controller.signal.aborted||!mounted.current||token!==generation.current)throw new Error('Export cancelled.');bytes+=blob.size;if(bytes>120*1024*1024)throw new Error('Export exceeds 120 MB. Use JPG or a lower extraction resolution.');entries.push({blob,name:frameName(i,format)});setProgress((n+1)/indices.length*70);setStatus(`Preparing image ${n+1}/${indices.length}`);await new Promise(r=>setTimeout(r,0));}
       if(single){if(!controller.signal.aborted&&mounted.current&&token===generation.current)downloadBlob(entries[0].blob,entries[0].name);}
-      else{const note=['PicSnips Scroll Animation Maker','Posting order follows the order you chose in PicSnips.','X requires manual image attachment; viewers advance the images themselves.','Autoplay is a PicSnips preview only.','Times are seconds. Browser-seek timestamps are approximate when compositor timestamps are unavailable.','',...frames.map((f,i)=>`${frameName(i,format)} | requested=${f.requested.toFixed(6)} | ${f.verified?'decoded':'seek'}=${f.actual.toFixed(6)} | ${f.width}x${f.height}`)].join('\n');const blob=await zipPieces(entries,note,p=>{if(mounted.current&&token===generation.current){setProgress(70+p*.3);setStatus(`Preparing ZIP ${Math.round(p)}%`);}});if(!controller.signal.aborted&&mounted.current&&token===generation.current)downloadBlob(blob,'picsnips-scroll-frames.zip');}
-      if(controller.signal.aborted)throw new Error('Export cancelled.');if(mounted.current&&token===generation.current){setProgress(100);setStatus('Download ready.');}
-    }catch(e){if(mounted.current&&token===generation.current){setError(e instanceof Error?e.message:'Export failed.');setStatus('');}}
+      else{const note=['PicSnips Scroll Animation Maker','Posting order follows the order you chose in PicSnips.','X requires manual image attachment; viewers advance the images themselves.','Autoplay is a PicSnips preview only.','Times are seconds. Browser-seek timestamps are approximate when compositor timestamps are unavailable.','',...frames.map((f,i)=>`${frameName(i,format)} | requested=${f.requested.toFixed(6)} | ${f.verified?'decoded':'seek'}=${f.actual.toFixed(6)} | ${f.width}x${f.height}`)].join('\n');const blob=await zipPieces(entries,note,p=>{if(mounted.current&&token===generation.current){setProgress(70+p*.3);setStatus(`Preparing ZIP ${Math.round(p)}%`);}});if(!controller.signal.aborted&&mounted.current&&token===generation.current)downloadBlob(blob,'picsnips-scroll-frames.zip',frames.length);}
+      if(controller.signal.aborted)throw new Error('Export cancelled.');if(mounted.current&&token===generation.current){setProgress(100);setStatus('Download ready.');trackEvent('export_completed', { ...details, elapsed_ms: Math.round(performance.now() - started) });}
+    }catch(e){trackEvent(controller.signal.aborted ? 'export_cancelled' : 'export_failed', details);if(mounted.current&&token===generation.current){setError(e instanceof Error?e.message:'Export failed.');setStatus('');}}
     finally{if(mounted.current&&token===generation.current)setBusy(false);}
   }
   function reorder(from:number,to:number){if(from===to||busy)return;setPlaying(false);setFrames(items=>{const result=[...items];const [item]=result.splice(from,1);result.splice(to,0,item);return result;});setIndex(to);}

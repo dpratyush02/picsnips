@@ -7,7 +7,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test lib/geometry.test.ts lib/scroll/scroll.test.ts lib/voice/dsp.test.ts lib/voice/adaptive.test.ts",
+    "test": "node --experimental-strip-types --test lib/geometry.test.ts lib/scroll/scroll.test.ts lib/voice/dsp.test.ts lib/voice/adaptive.test.ts lib/analytics.test.ts",
     "prepare:voice": "node scripts/prepare-voice-assets.mjs",
     "build:production": "npm run prepare:voice -- --ffmpeg && npm run build"
   },
@@ -25,6 +25,7 @@
     "jszip": "^3.10.2",
     "lucide-react": "^1.72.0",
     "next": "16.4.6",
+    "posthog-js": "^1.450.1",
     "radix-ui": "^1.8.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",

@@ -1,3 +1,5 @@
+import { trackEvent } from "@/lib/analytics";
+
 /**
  * Publishing boundary.
  *
@@ -35,6 +37,7 @@ export class IntentComposerPublisher implements XPublisher {
 
     const popup = window.open(intent.toString(), "_blank");
     if (popup) popup.opener = null;
+    trackEvent(popup ? "x_composer_opened" : "x_composer_blocked", { count: request.imageCount });
 
     return { mode: "intent", opened: popup !== null };
   }

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <SiteFrame>
-      <Legal title="Privacy" updated="November 17, 2026">
+      <Legal title="Privacy" updated="November 18, 2026">
         <p>
           PicSnips is a free image splitter. It does not ask you to create an account, and it does not have a backend that receives your pictures.
         </p>
@@ -38,9 +38,16 @@ export default function PrivacyPage() {
         <p>
           Dodo Payments collects your payment, contact, and brand details on its hosted checkout. PicSnips uses the contact and brand details from completed purchases to follow up and set up your sponsorship. Approved listings display the brand name, link, description, and logo when provided.
         </p>
+        <h2>Usage analytics</h2>
+        <p>
+          PicSnips uses Vercel Analytics for website traffic and, when configured, PostHog for page visits, tool usage, processing results, download requests, and sponsor checkout activity. Events may include your browser and device, referral source, campaign tags, file type and size, recording duration, output settings, and processing time. Uploaded media, filenames, captions, and payment or contact details are excluded from these events. URL query strings are removed, except for campaign tags collected separately.
+        </p>
+        <p>
+          PostHog session recording and automatic form and click capture are disabled. The PostHog integration respects browser Do Not Track and Global Privacy Control signals.
+        </p>
         <h2>Cookies and storage</h2>
         <p>
-          This version does not set analytics cookies and does not save your image or caption in local storage.
+          This integration stores a random PostHog browser identifier in local storage to measure repeat visits without an account. It is configured to use local storage instead of analytics cookies. PicSnips also stores your theme preference and the time your browser last contributed to the Redis visitor counter. Your uploaded media and captions are not saved in local storage.
         </p>
         <h2>Contact</h2>
         <p>
