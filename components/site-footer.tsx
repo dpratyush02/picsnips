@@ -4,7 +4,7 @@ import { Logo } from "@/components/logo";
 const groups = [
   { title: "Create", links: [{ href: "/tools", label: "All tools" }, { href: "/split", label: "Image Splitter" }, { href: "/library", label: "Image Library" }] },
   { title: "Explore", links: [{ href: "/#examples", label: "Made with PicSnips" }, { href: "/#community", label: "Community" }, { href: "/#faq", label: "FAQ" }] },
-  { title: "PicSnips", links: [{ href: "/privacy", label: "Privacy" }, { href: "/terms", label: "Terms" }] },
+  { title: "PicSnips", links: [{ href: "/sponsors", label: "Sponsor PicSnips" }, { href: "/privacy", label: "Privacy" }, { href: "/terms", label: "Terms" }] },
 ];
 
 export function SiteFooter({ showFaqLink }: { showFaqLink: boolean }) {

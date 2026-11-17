@@ -8,6 +8,7 @@ import { HowItWorks } from "@/components/how-it-works";
 import { Logo } from "@/components/logo";
 import { SectionHeading } from "@/components/section-heading";
 import { SiteFrame } from "@/components/site-frame";
+import { SponsorSection, SponsorStrip } from "@/components/sponsor-section";
 import { SplitShowcase } from "@/components/split-showcase";
 import { ToolkitCards } from "@/components/toolkit-cards";
 import { Button } from "@/components/ui/button";
@@ -24,11 +25,12 @@ export default function HomePage() {
 
   return (
     <SiteFrame showHeader={false}>
-      <header className="flex min-h-16 items-center justify-between gap-2 px-4 sm:px-8">
-        <Link href="/" aria-label="PicSnips home" className="inline-flex shrink-0 rounded-md focus-visible:outline-2">
+      <header className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-3 px-4 pt-3 sm:px-8 md:flex md:gap-4 md:pt-0">
+        <Link href="/" aria-label="PicSnips home" className="col-start-1 row-start-1 inline-flex shrink-0 justify-self-start rounded-md focus-visible:outline-2">
           <Logo />
         </Link>
-        <div className="flex items-center gap-2 text-sm sm:gap-4">
+        <SponsorStrip className="col-span-2 row-start-2 justify-self-center md:ml-auto" />
+        <div className="col-start-2 row-start-1 flex items-center gap-2 text-sm sm:gap-4">
           <VisitorCount />
           <a
             href="https://github.com/dpratyush02/picsnips"
@@ -66,6 +68,7 @@ export default function HomePage() {
           </div>
           <div className="mt-8 sm:mt-12"><TestimonialCarousel posts={testimonialPosts} /></div>
         </section>
+        <SponsorSection />
         <Faq voiceReady={voiceReady} />
         <section className="site-width pb-16 pt-6 sm:pb-24">
           <div className="rounded-2xl bg-primary px-6 py-14 text-center text-primary-foreground sm:py-20">

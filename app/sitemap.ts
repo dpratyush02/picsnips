@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...(hasVoiceRuntime() ? [{ url: `${siteUrl}/tools/voice-enhancer`, lastModified, changeFrequency: "monthly" as const, priority: 0.8 }] : []),
     { url: `${siteUrl}/tools`, lastModified, changeFrequency: "weekly", priority: 0.8 },
     { url: `${siteUrl}/tools/scroll-animation`, lastModified, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${siteUrl}/sponsors`, lastModified, changeFrequency: "monthly", priority: 0.6 },
     {
       url: `${siteUrl}/`,
       lastModified,

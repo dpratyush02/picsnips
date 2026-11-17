@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <SiteFrame>
-      <Legal title="Privacy" updated="November 13, 2026">
+      <Legal title="Privacy" updated="November 17, 2026">
         <p>
           PicSnips is a free image splitter. It does not ask you to create an account, and it does not have a backend that receives your pictures.
         </p>
@@ -33,6 +33,10 @@ export default function PrivacyPage() {
         <h2>What the host can see</h2>
         <p>
           Loading this website is a normal web request. Whoever hosts the page may log the usual request data, such as IP address, browser, and the URL. That log does not include the image you split.
+        </p>
+        <h2>Sponsorship inquiries</h2>
+        <p>
+          If you submit a sponsorship inquiry, FormSubmit processes your contact email and brand details to deliver the message to our inbox. Contact emails are used to follow up. We only publish brand details for approved listings.
         </p>
         <h2>Cookies and storage</h2>
         <p>
