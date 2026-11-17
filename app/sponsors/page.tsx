@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
 import { SiteFrame } from "@/components/site-frame";
-import { SponsorForm } from "@/components/sponsor-form";
+import { SponsorCheckoutButton } from "@/components/sponsor-checkout-button";
 import { siteUrl } from "@/lib/site";
+import { sponsorCheckoutConfig } from "@/lib/sponsor-checkout";
 import { sponsorPriceLabel } from "@/lib/sponsors";
 
 export const metadata: Metadata = {
   title: "Sponsor PicSnips",
-  description: "Register your interest in a $69 USD lifetime sponsor placement on the PicSnips homepage.",
+  description: `Get a lifetime sponsor placement on the PicSnips homepage for one ${sponsorPriceLabel} USD payment.`,
   alternates: { canonical: `${siteUrl}/sponsors` },
 };
 
@@ -19,6 +20,8 @@ const benefits = [
 ];
 
 export default function SponsorsPage() {
+  const checkout = sponsorCheckoutConfig();
+
   return (
     <SiteFrame showFaqLink={false}>
       <main className="site-width py-12 sm:py-20">
@@ -33,7 +36,7 @@ export default function SponsorsPage() {
               <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line p-5 sm:p-6">
                 <div>
                   <h2 className="text-sm font-medium">Lifetime sponsor placement</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Planned one-time price</p>
+                  <p className="mt-1 text-sm text-muted-foreground">One-time payment</p>
                 </div>
                 <p className="font-mono text-4xl tracking-tight">{sponsorPriceLabel}<span className="ml-1.5 text-sm text-muted-foreground">USD</span></p>
               </div>
@@ -45,11 +48,19 @@ export default function SponsorsPage() {
                 ))}
               </ul>
             </div>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-              Share your details and we’ll follow up by email about availability and next steps.
-            </p>
           </div>
-          <SponsorForm />
+          <section aria-labelledby="sponsor-checkout-title" className="rounded-2xl border border-line bg-card p-5 sm:p-8">
+            <h2 id="sponsor-checkout-title" className="text-2xl font-medium tracking-tight">Buy a sponsor slot</h2>
+            <p className="mb-6 mt-3 text-sm leading-relaxed text-muted-foreground">
+              Enter your brand details and pay on Dodo Payments. We’ll review your listing after verifying payment. Any applicable tax appears at checkout.
+            </p>
+            {checkout ? (
+              <>
+                {!checkout.live && <p className="mb-3 text-sm font-medium">Test checkout</p>}
+                <SponsorCheckoutButton />
+              </>
+            ) : <p role="status" className="text-sm text-muted-foreground">Sponsor checkout is currently unavailable.</p>}
+          </section>
         </div>
       </main>
     </SiteFrame>

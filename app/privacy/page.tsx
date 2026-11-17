@@ -34,9 +34,9 @@ export default function PrivacyPage() {
         <p>
           Loading this website is a normal web request. Whoever hosts the page may log the usual request data, such as IP address, browser, and the URL. That log does not include the image you split.
         </p>
-        <h2>Sponsorship inquiries</h2>
+        <h2>Sponsor checkout</h2>
         <p>
-          If you submit a sponsorship inquiry, FormSubmit processes your contact email and brand details to deliver the message to our inbox. Contact emails are used to follow up. We only publish brand details for approved listings.
+          Dodo Payments collects your payment, contact, and brand details on its hosted checkout. PicSnips uses the contact and brand details from completed purchases to follow up and set up your sponsorship. Approved listings display the brand name, link, description, and logo when provided.
         </p>
         <h2>Cookies and storage</h2>
         <p>

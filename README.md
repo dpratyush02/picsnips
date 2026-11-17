@@ -27,10 +27,14 @@ The badge requests the production visitor count for the past seven days, then re
 
 ## Sponsorships
 
-The sponsor panel sits directly above the homepage FAQ and links to `/sponsors`. The page advertises a planned $69 USD one-time price for a lifetime homepage listing and collects sponsorship inquiries.
+The sponsor panel links to `/sponsors`, where buyers can purchase a lifetime homepage placement for one $69 USD payment. Dodo Payments collects the brand name, website, description, and optional logo URL during hosted checkout.
 
-The **Send inquiry** button passes submissions to [FormSubmit](https://formsubmit.co/documentation) for email delivery. Set `SPONSOR_INQUIRY_DESTINATION` to your inbox address in the server environment, using `.env.local` for development or Vercel project settings for deployment. For the first activation, send a test inquiry through `/sponsors`, open the confirmation email in the sponsor inbox, and click **Activate Form**. Then send a second test and verify the inquiry and Reply-To address.
+Set these server-side variables in `.env.local` for development or in Vercel for the target environment:
 
-You can switch `SPONSOR_INQUIRY_DESTINATION` to the opaque address token from the activation email. Keep `NEXT_PUBLIC_SITE_URL` set to your public PicSnips URL so FormSubmit sees a consistent referring page.
+- `DODO_PAYMENTS_API_KEY` — API key for the selected mode
+- `DODO_SPONSOR_PRODUCT_ID` — product ID for a fixed, one-time $69 USD sponsor product in the same mode
+- `DODO_PAYMENTS_ENVIRONMENT` — `test_mode` (default) or `live_mode`
 
-To publish an approved sponsor, store its logo under `public/` and add it to `publishedSponsors` in `lib/sponsors.ts`. The compact homepage strip shows up to four of the same sponsors. Keep contact emails out of the public list.
+Use the base USD price with discounts, localized pricing, purchasing power adjustments, pay-what-you-want, and add-ons off for this product. Set `NEXT_PUBLIC_SITE_URL` to the URL buyers should return to. Run a sandbox purchase and verify the payment and brand details before enabling live mode. See the [Dodo Checkout Sessions reference](https://docs.dodopayments.com/api-reference/checkout-sessions/create).
+
+Verify that the sponsor product payment succeeded in Dodo before publishing. If needed, use the [payment details API](https://docs.dodopayments.com/api-reference/payments/get-payments-1) to read `custom_field_responses`. Review the website and brand details, store the approved logo under `public/`, and add the listing to `publishedSponsors` in `lib/sponsors.ts`. The compact homepage strip shows up to four of the same sponsors. Keep contact emails out of the public list.

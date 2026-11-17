@@ -33,7 +33,7 @@ export function SponsorSection() {
           <p className="mt-4 max-w-sm text-pretty text-muted-foreground">
             Put your brand in front of people making things. Get a linked spot on the PicSnips homepage for the lifetime of the site.
           </p>
-          <p className="mt-6 text-sm text-muted-foreground"><strong className="font-medium text-foreground">{sponsorPriceLabel} USD</strong> · Planned one-time price</p>
+          <p className="mt-6 text-sm text-muted-foreground"><strong className="font-medium text-foreground">{sponsorPriceLabel} USD</strong> · One-time payment</p>
         </div>
 
         <div className="grid content-center gap-3 border-t border-line bg-muted/40 p-5 sm:p-8 md:border-t-0 md:border-l">
@@ -50,8 +50,8 @@ export function SponsorSection() {
           <Link href="/sponsors" className="flex items-center gap-3 rounded-xl border border-line bg-card p-3.5 transition-colors hover:border-foreground focus-visible:outline-2">
             <span aria-hidden="true" className="grid size-11 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground"><Plus className="size-5" /></span>
             <span className="min-w-0 flex-1">
-              <span className="block font-medium">Register your interest</span>
-              <span className="mt-0.5 block text-sm text-muted-foreground">Share your brand details</span>
+              <span className="block font-medium">Buy an ad slot</span>
+              <span className="mt-0.5 block text-sm text-muted-foreground">Lifetime homepage placement</span>
             </span>
             <ArrowUpRight className="size-4 shrink-0" aria-hidden="true" />
           </Link>
