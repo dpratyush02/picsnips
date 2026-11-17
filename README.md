@@ -17,13 +17,12 @@ Optional environment variables:
 
 ## Homepage visitor count
 
-Enable Web Analytics for the Vercel project and set these server-side environment variables in Vercel before redeploying:
+The live visitor counter uses Upstash Redis (or Vercel KV) to track and display total unique visitors in real-time. Set these server-side environment variables:
 
-- `VERCEL_ANALYTICS_TOKEN` — access token with permission to read the project's Web Analytics
-- `VERCEL_ANALYTICS_PROJECT_ID` — ID of the PicSnips project
-- `VERCEL_ANALYTICS_TEAM_ID` — team ID for a team-owned project. Omit for a personal project.
+- `UPSTASH_REDIS_REST_URL` (or `KV_REST_API_URL`) — REST endpoint for your Upstash Redis database
+- `UPSTASH_REDIS_REST_TOKEN` (or `KV_REST_API_TOKEN`) — REST access token
 
-The badge requests the production visitor count for the past seven days, then refreshes every five minutes while the page is visible. If the first request cannot get a count, it displays the recorded visitor milestone. See the [Vercel Web Analytics API guide](https://vercel.com/docs/analytics/web-analytics-api).
+Visitors are deduplicated per browser session/day via localStorage so page reloads do not inflate the count. If Redis is temporarily unreachable, it displays the baseline milestone.
 
 ## Sponsorships
 

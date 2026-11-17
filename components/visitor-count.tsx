@@ -3,7 +3,7 @@
 import { UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const baselineVisitors = 19154;
+const baselineVisitors = 29369;
 const refreshInterval = 5 * 60 * 1000;
 const numberFormat = new Intl.NumberFormat("en-US");
 
@@ -14,25 +14,44 @@ export function VisitorCount() {
     const controller = new AbortController();
     let timer: number;
 
-    async function refresh() {
+    async function recordOrFetch() {
       try {
         if (document.visibilityState === "hidden") return;
 
-        const response = await fetch("/api/visitor-count", { signal: controller.signal });
+        let isNewVisitor = true;
+        const now = Date.now();
+        try {
+          const lastVisit = localStorage.getItem("picsnips:visited_at");
+          if (lastVisit && now - Number(lastVisit) < 24 * 60 * 60 * 1000) {
+            isNewVisitor = false;
+          }
+        } catch {}
+
+        const method = isNewVisitor ? "POST" : "GET";
+        const response = await fetch("/api/visitor-count", {
+          method,
+          signal: controller.signal,
+        });
+
         if (response.ok) {
           const data = await response.json();
           if (typeof data.visitors === "number" && !controller.signal.aborted) {
             setVisitors(Math.max(baselineVisitors, data.visitors));
+            if (isNewVisitor) {
+              try {
+                localStorage.setItem("picsnips:visited_at", String(now));
+              } catch {}
+            }
           }
         }
       } catch {
-        // Keep the last known count while the connection recovers.
+        // Keep the current count while connection recovers
       } finally {
-        if (!controller.signal.aborted) timer = window.setTimeout(refresh, refreshInterval);
+        if (!controller.signal.aborted) timer = window.setTimeout(recordOrFetch, refreshInterval);
       }
     }
 
-    void refresh();
+    void recordOrFetch();
     return () => {
       controller.abort();
       window.clearTimeout(timer);
@@ -42,7 +61,7 @@ export function VisitorCount() {
   return (
     <span
       className="inline-flex items-center gap-1.5 whitespace-nowrap text-muted-foreground"
-      title="Total visitors reached"
+      title="Total creators and visitors"
     >
       <UsersRound aria-hidden="true" className="hidden size-4 sm:inline" />
       <span>
