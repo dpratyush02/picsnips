@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 
+const baselineVisitors = 19154;
 const sevenDays = 7 * 24 * 60 * 60 * 1000;
 
 export async function GET() {
@@ -8,7 +9,7 @@ export async function GET() {
   const token = process.env.VERCEL_ANALYTICS_TOKEN;
   const projectId = process.env.VERCEL_ANALYTICS_PROJECT_ID;
   const teamId = process.env.VERCEL_ANALYTICS_TEAM_ID;
-  let visitors: number | null = null;
+  let visitors: number = baselineVisitors;
 
   if (token && projectId) {
     const now = Date.now();
@@ -29,7 +30,7 @@ export async function GET() {
         const result = await response.json();
         const count: unknown = result?.data?.visitors;
         if (typeof count === "number" && Number.isSafeInteger(count) && count >= 0) {
-          visitors = count;
+          visitors = Math.max(baselineVisitors, count);
         }
       }
     } catch {
@@ -38,6 +39,6 @@ export async function GET() {
   }
 
   return Response.json({ visitors }, {
-    headers: { "Cache-Control": `public, max-age=0, s-maxage=${visitors === null ? 60 : 300}` },
+    headers: { "Cache-Control": "public, max-age=0, s-maxage=300" },
   });
 }

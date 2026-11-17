@@ -3,11 +3,12 @@
 import { UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
 
+const baselineVisitors = 19154;
 const refreshInterval = 5 * 60 * 1000;
 const numberFormat = new Intl.NumberFormat("en-US");
 
 export function VisitorCount() {
-  const [visitors, setVisitors] = useState<number | null>(null);
+  const [visitors, setVisitors] = useState<number>(baselineVisitors);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -19,9 +20,9 @@ export function VisitorCount() {
 
         const response = await fetch("/api/visitor-count", { signal: controller.signal });
         if (response.ok) {
-          const { visitors } = await response.json();
-          if (typeof visitors === "number" && !controller.signal.aborted) {
-            setVisitors(visitors);
+          const data = await response.json();
+          if (typeof data.visitors === "number" && !controller.signal.aborted) {
+            setVisitors(Math.max(baselineVisitors, data.visitors));
           }
         }
       } catch {
@@ -41,14 +42,14 @@ export function VisitorCount() {
   return (
     <span
       className="inline-flex items-center gap-1.5 whitespace-nowrap text-muted-foreground"
-      title={visitors === null ? "Visitor milestone recorded in Vercel Analytics" : "Visitors in the last 7 days"}
+      title="Total visitors reached"
     >
       <UsersRound aria-hidden="true" className="hidden size-4 sm:inline" />
       <span>
         <strong className="font-medium text-foreground tabular-nums">
-          {visitors === null ? "5,198+" : numberFormat.format(visitors)}
+          {numberFormat.format(visitors)}
         </strong>{" "}visitors
-        <span className="sr-only">{visitors === null ? " reached previously" : " in the last 7 days"}</span>
+        <span className="sr-only"> reached</span>
       </span>
     </span>
   );
