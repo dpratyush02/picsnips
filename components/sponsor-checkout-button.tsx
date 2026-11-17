@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
+import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 
 export function SponsorCheckoutButton() {
@@ -23,6 +24,7 @@ export function SponsorCheckoutButton() {
       });
       const result = await response.json();
       if (response.ok && typeof result?.url === "string") {
+        posthog.capture("sponsor_checkout_opened");
         window.location.assign(result.url);
         return;
       }

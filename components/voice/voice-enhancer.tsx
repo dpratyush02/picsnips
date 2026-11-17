@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AudioLines, Check, Download, LockKeyhole, Trash2, Upload } from 'lucide-react';
+import posthog from 'posthog-js';
 import { Button } from '@/components/ui/button';
 import { downloadBlob } from '@/lib/download';
 import { formatBytes } from '@/lib/files';
@@ -143,6 +144,7 @@ export default function VoiceEnhancer() {
       clearOutput();
       setOutput({...result, peaks: waveform(result.samples), url});
       setTrack('enhanced');
+      posthog.capture('voice_enhancement_completed',{source_kind:source.videoUrl?'video':'audio',adjustment_count:result.actions.length,adjustments:result.actions});
     });
   }
   function save(kind: 'wav' | 'mp3' | 'video') {
@@ -153,12 +155,14 @@ export default function VoiceEnhancer() {
       if (signal.aborted) throw new Error('Processing cancelled.');
       if (kind === 'wav') {
         downloadBlob(new Blob([wavBytes(output.samples, bits)], {type: 'audio/wav'}), `${base}_enhanced.wav`);
+        posthog.capture('voice_enhanced_file_downloaded',{output_kind:'wav',wav_bit_depth:bits});
         return;
       }
       const {encodeOutput} = await import('@/lib/voice/media');
       const result = await encodeOutput(new Blob([wavBytes(output.samples, 24)], {type: 'audio/wav'}), source.file, kind, bitrate, source.manifest, signal, value => updateProgress(signal, value, 'Encoding download…'));
       if (signal.aborted) throw new Error('Processing cancelled.');
       downloadBlob(result.blob, `${base}_enhanced.${result.extension}`);
+      posthog.capture('voice_enhanced_file_downloaded',{output_kind:kind,bitrate_kbps:bitrate});
     });
   }
   function switchTrack(next: 'original' | 'enhanced') {

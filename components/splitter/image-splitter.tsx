@@ -20,6 +20,7 @@ import {
   Upload,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import posthog from "posthog-js";
 import { toast } from "sonner";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
@@ -371,6 +372,11 @@ function SplitterTool() {
           setPhase("ready");
           setStatus(`${next.length} images ready`);
           setReadyTick((value) => value + 1);
+          posthog.capture("image_split_completed", {
+            split_mode: mode,
+            piece_count: next.length,
+            export_format: format,
+          });
         } catch (error) {
           if (isAbortError(error) || job !== jobRef.current) return;
           const message =
@@ -387,7 +393,7 @@ function SplitterTool() {
       window.clearTimeout(timer);
       jobRef.current += 1;
     };
-  }, [source, layout, layoutError, format, jpegQuality, retryTick, replacePieces, splitKey]);
+  }, [source, layout, layoutError, format, jpegQuality, mode, retryTick, replacePieces, splitKey]);
 
   function applyCount(next: number, nextMode = mode) {
     const safe = clamp(Math.round(next), MIN_PIECES, MAX_PIECES);
@@ -504,6 +510,12 @@ function SplitterTool() {
         setZipProgress,
       );
       downloadBlob(blob, archiveFilename(pieces.length, rows, cols));
+      posthog.capture("image_split_downloaded", {
+        download_method: "zip",
+        split_mode: mode,
+        piece_count: pieces.length,
+        export_format: format,
+      });
       toast.success(`Downloaded ${pieces.length} images in a ZIP.`, {
         description: "They are numbered from 01. Attach them to X in that order.",
       });
@@ -517,6 +529,12 @@ function SplitterTool() {
   function downloadEach() {
     if (phase !== "ready" || pieces.length === 0) return;
     downloadBlobs(pieces.map((piece) => ({ blob: piece.blob, name: piece.name })));
+    posthog.capture("image_split_downloaded", {
+      download_method: "individual_files",
+      split_mode: mode,
+      piece_count: pieces.length,
+      export_format: format,
+    });
     toast.message(`Started ${pieces.length} downloads`, {
       description:
         "If your browser only saves one file, allow multiple downloads, or use the ZIP.",
@@ -535,6 +553,11 @@ function SplitterTool() {
         toast.error("Your browser blocked the X window. Allow pop-ups and try again.");
         return;
       }
+      posthog.capture("image_split_x_composer_opened", {
+        split_mode: mode,
+        piece_count: pieces.length,
+        export_format: format,
+      });
       toast.message("X composer opened", {
         description: `Attach the images yourself, in order from 01. PicSnips cannot post them for you.`,
       });
