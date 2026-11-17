@@ -1,4 +1,4 @@
-export const sponsorPriceInCents = 6900;
+export const sponsorPriceInCents = 5900;
 export const sponsorPriceLabel = `$${sponsorPriceInCents / 100}`;
 
 export type PublishedSponsor = {

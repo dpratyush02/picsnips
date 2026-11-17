@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     return reply({ url: await createSponsorCheckout(config) });
   } catch (error) {
     console.warn("Sponsor checkout failed", error instanceof Error ? error.message : "Unknown error");
-    return reply({ error: "We couldn’t open Dodo checkout. Please try again in a moment." }, 502);
+    const message = error instanceof Error ? error.message : "We couldn’t open Dodo checkout. Please try again in a moment.";
+    return reply({ error: message }, 502);
   }
 }

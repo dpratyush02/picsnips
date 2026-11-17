@@ -27,12 +27,12 @@ The badge requests the production visitor count for the past seven days, then re
 
 ## Sponsorships
 
-The sponsor panel links to `/sponsors`, where buyers can purchase a lifetime homepage placement for one $69 USD payment. Dodo Payments collects the brand name, website, description, and optional logo URL during hosted checkout.
+The sponsor panel links to `/sponsors`, where buyers can purchase a lifetime homepage placement for one $59 USD payment. Dodo Payments collects the brand name, website, description, and optional logo URL during hosted checkout.
 
 Set these server-side variables in `.env.local` for development or in Vercel for the target environment:
 
 - `DODO_PAYMENTS_API_KEY` — API key for the selected mode
-- `DODO_SPONSOR_PRODUCT_ID` — product ID for a fixed, one-time $69 USD sponsor product in the same mode
+- `DODO_SPONSOR_PRODUCT_ID` — product ID for a fixed, one-time $59 USD sponsor product in the same mode
 - `DODO_PAYMENTS_ENVIRONMENT` — `test_mode` (default) or `live_mode`
 
 Use the base USD price with discounts, localized pricing, purchasing power adjustments, pay-what-you-want, and add-ons off for this product. Set `NEXT_PUBLIC_SITE_URL` to the URL buyers should return to. Run a sandbox purchase and verify the payment and brand details before enabling live mode. See the [Dodo Checkout Sessions reference](https://docs.dodopayments.com/api-reference/checkout-sessions/create).
